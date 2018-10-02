@@ -1,0 +1,3 @@
+.result div { display: inline-block; }
+.result img { max-width: 200px; }
+.result span { display: block; }

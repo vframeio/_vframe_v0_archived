@@ -1,0 +1,47 @@
+caffe:
+  places_365:
+    scale: 1
+    size: (224, 224)
+    mean: (104, 117, 123)
+    origin: https://github.com/CSAILVision/places365
+    googlenet:
+      name: Places 365 GoogLeNet
+      comment: Use as default
+      dir: caffe/places365/googlenet_places365
+      model: googlenet_places365.caffemodel
+      prototxt: googlenet_places365.prototxt
+    alexnet:
+      name: Places 365 AlexNet
+      comment:
+      origin: https://github.com/CSAILVision/places365
+      dir: caffe/places365/alexnet_places365
+      model: alexnet_places365.caffemodel
+      prototxt: alexnet_places365.prototxt
+    resnet152:
+      name: Places 365 ResNet152
+      comment:
+      origin: https://github.com/CSAILVision/places365
+      dir: caffe/places365/resnet152_places365
+      model: resnet152_places365.caffemodel
+      prototxt: alexnet_places365.prototxt
+    vgg16:
+      name: Places 365 VGG16
+      comment: 
+      origin: https://github.com/CSAILVision/places365
+      dir: caffe/places365/vgg16_places365
+      model: vgg16_places365.caffemodel
+      prototxt: vgg16_places365.prototxt
+darknet:
+  voc:
+    scale: 0
+    mean: 0
+    origin: 0
+    yolov3:
+      size: (618, 618)
+      name: YoloV3 VOC Object Detector
+      comment: from pjreddie and learnopencv.com
+      weights: darknet/adamhrv/weights/yolov3.weights
+      cfg: darknet/adamhrv/cfg/yolov3-voc.cfg
+      meta: darknet/adamhrv/cfg/yolov3.data
+
+
