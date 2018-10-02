@@ -20,6 +20,11 @@ from vframe.settings import vframe_cfg as cfg
   type=cfg.DataStoreVar,
   show_default=True,
   help=click_utils.show_help(types.DataStore))
+@click.option('--verified', 'opt_verified',
+  type=cfg.VerifiedVar,
+  default=click_utils.get_default(types.Verified.VERIFIED),
+  show_default=True,
+  help=click_utils.show_help(types.Verified))
 @click.option('--from', 'opt_format_in',
   default=click_utils.get_default(types.FileExt.PKL),
   type=cfg.FileExtVar,
@@ -40,7 +45,7 @@ from vframe.settings import vframe_cfg as cfg
 @click.option('-f', '--force', 'opt_force', is_flag=True,
   help='Force overwrite')
 @click.pass_context
-def cli(ctx, fp_in, fp_out, opt_disk, opt_format_in, opt_format_out, 
+def cli(ctx, fp_in, fp_out, opt_disk, opt_verified, opt_format_in, opt_format_out, 
   opt_metadata_type, opt_minify, opt_force):
   """Converts JSON to Pickle"""
   
