@@ -1,0 +1,3 @@
+#!/bin/bash
+export PYTHONPATH=/vframe/vframe
+python -m vframe.cli "$@"
