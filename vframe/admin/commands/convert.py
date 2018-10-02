@@ -70,7 +70,7 @@ def cli(ctx, fp_in, fp_out, opt_disk, opt_format_in, opt_format_out,
 
   if not fp_in:
     fp_in = Paths.metadata_index(opt_metadata_type, data_store=opt_disk, 
-      file_format=opt_format_in, verified=ctx.opts['verified'])
+      file_format=opt_format_in, verified=opt_verified)
       
   if not fp_out:
     fpp_in = Path(fp_in)
