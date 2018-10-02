@@ -44,7 +44,8 @@ fi
 metadata_src=/data_store_ssd/apps/syrianarchive/metadata
 metadata_dst=/data_store/apps/syrianarchive/metadata
 
-for t in mediainfo keyframe keyframe_status coco places365 media_record sugarcube openimages feature_vgg16 feature_pt_resnet18 feature_pt_alexnet
+#for t in mediainfo keyframe keyframe_status coco places365 media_record sugarcube openimages feature_vgg16 feature_pt_resnet18 feature_pt_alexnet
+for t in feature_resnet18
 do
     echo '-------------------------------------------------------------------'
     echo "Syncing $t"

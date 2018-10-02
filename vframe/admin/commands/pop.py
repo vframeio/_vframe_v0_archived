@@ -35,7 +35,6 @@ from vframe.settings import vframe_cfg as cfg
 @click.pass_context
 def cli(ctx, fp_in, opt_format, opt_disk, opt_metadata_types):
   """Add mappings data to chain"""
-  
 
   # -------------------------------------------------
   # imports 

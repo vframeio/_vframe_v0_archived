@@ -50,7 +50,7 @@ def cli(ctx, sink, opt_disk, opt_density, opt_net, opt_size, opt_gpu):
   from vframe.settings.paths import Paths
   from vframe.utils import file_utils, im_utils, logger_utils
   from vframe.models.metadata_item import FeatureMetadataItem
-  from vframe.processors.feature_extractor_pytorch import FeatureExtractor
+  from vframe.processors.feature_extractor import FeatureExtractor
   
   # -------------------------------------------------
   # process 
@@ -59,9 +59,9 @@ def cli(ctx, sink, opt_disk, opt_density, opt_net, opt_size, opt_gpu):
 
   # select type of metadata
   if opt_net == types.PyTorchNet.RESNET18:
-    metadata_type = types.Metadata.FEATURE_PT_RESNET18
+    metadata_type = types.Metadata.FEATURE_RESNET18
   elif opt_net == types.PyTorchNet.ALEXNET:
-    metadata_type = types.Metadata.FEATURE_PT_ALEXNET
+    metadata_type = types.Metadata.FEATURE_ALEXNET
   
   log.debug('PyTorch feature vectors using: {}'.format(metadata_type.name.lower()))
 
@@ -112,6 +112,7 @@ def cli(ctx, sink, opt_disk, opt_density, opt_net, opt_size, opt_gpu):
         fp_keyframe = join(dir_sha256, file_utils.zpad(idx), opt_size_label, 'index.jpg')
       try:
         im = cv.imread(fp_keyframe)
+        _ = im.shape  # throws error if file did not load
         vec = fe.extract(im)
         metadata[idx] = vec.tolist()  # convert to list, JSON safe
       except Exception as ex:

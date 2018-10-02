@@ -1,4 +1,5 @@
 """
+DEPRECATED: use admin cli
 Converts between Pickle and JSON files
 """
 import click
@@ -7,10 +8,12 @@ from vframe.settings import types
 from vframe.utils import click_utils
 from vframe.settings import vframe_cfg as cfg
 
+from cli_vframe import processor
+
 # --------------------------------------------------------
 # Converts Pickle <--> JSON
 # --------------------------------------------------------
-@click.command()
+@click.command('convert_format', short_help='Converts between JSON and Pickle')
 @click.option('-i', '--input', 'fp_in', type=str,
     help="Path to serialized JSON")
 @click.option('-o', '--output', 'fp_out', type=str,
@@ -39,8 +42,9 @@ from vframe.settings import vframe_cfg as cfg
   help='Minify output if using JSON')
 @click.option('-f', '--force', 'opt_force', is_flag=True,
   help='Force overwrite')
+@processor
 @click.pass_context
-def cli(ctx, fp_in, fp_out, opt_disk, opt_format_in, opt_format_out, 
+def cli(ctx, sink, fp_in, fp_out, opt_disk, opt_format_in, opt_format_out, 
   opt_metadata_type, opt_minify, opt_force):
   """Converts JSON to Pickle"""
   
@@ -65,8 +69,8 @@ def cli(ctx, fp_in, fp_out, opt_disk, opt_format_in, opt_format_out,
   log = logger_utils.Logger.getLogger()
 
   if not opt_metadata_type and not fp_in:
-    log.error('Error: missing option for either "-t" / "--type" or "-i" / "--input"')
-    return
+    log.error('Missing output path or metadata type')
+    ctx.fail('Error: missing option for either "-t" / "--type" or "-i" / "--input"')
 
   if not fp_in:
     fp_in = Paths.metadata_index(opt_metadata_type, data_store=opt_disk, 
@@ -100,3 +104,19 @@ def cli(ctx, fp_in, fp_out, opt_disk, opt_format_in, opt_format_out,
     txt_verb = 'increased' if size_dst > size_src else 'decreased'
     log.info('Size {} from {:.2f}MB to {:.2f}MB ({:.2f}%)'.format(
       txt_verb, size_src, size_dst, per))
+
+
+  # accumulate chair items
+  chair_items = []
+  while True:
+    try:
+      chair_items.append( (yield) )
+    except GeneratorExit as ex:
+      break
+
+  
+  # -------------------------------------------------
+  # rebuild the generator
+
+  for chair_item in chair_items:
+    sink.send(chair_item)

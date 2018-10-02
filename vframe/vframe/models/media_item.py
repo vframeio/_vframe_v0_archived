@@ -82,7 +82,9 @@ class MediaRecordItem:
       elif k == types.Metadata.PLACES365.name.lower():
         mapped[types.Metadata.PLACES365] = ClassifyMetadataItem.from_dict(v) 
       elif k == types.Metadata.COCO.name.lower():
-        mapped[types.Metadata.COCO] = DetectMetadataItem.from_dict(v) 
+        mapped[types.Metadata.COCO] = DetectMetadataItem.from_dict(v)
+      elif k == types.Metadata.SUBMUNITION.name.lower():
+        mapped[types.Metadata.SUBMUNITION] = DetectMetadataItem.from_dict(v)
       else:
         msg = '{} is a not valid metadata type or not yet impelemented'.format(k) 
         cls.log.error(msg)

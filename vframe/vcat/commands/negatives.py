@@ -5,6 +5,7 @@ import click
 
 from vframe.utils import click_utils
 from vframe.settings import types
+from vframe.settings import vframe_cfg as cfg
 
 FP_NEG_LIST = '/data_store_ssd/apps/vframe/models/darknet/vframe/cluster_munition_07/negatives.txt'
 DIR_PROJECT = '/data_store_ssd/apps/vframe/models/darknet/vframe/cluster_munition_07'
@@ -19,21 +20,21 @@ DIR_PROJECT = '/data_store_ssd/apps/vframe/models/darknet/vframe/cluster_munitio
   help='Override file input path')
 @click.option('-v', '--verified', 'opt_verified',
   default=click_utils.get_default(types.Verified.VERIFIED),
-  type=click_utils.VerifiedVar,
+  type=cfg.VerifiedVar,
   show_default=True,
   help=click_utils.show_help(types.Verified))
 @click.option('-d', '--disk', 'opt_disk',
   default=click_utils.get_default(types.DataStore.SSD),
-  type=click_utils.DataStoreVar,
+  type=cfg.DataStoreVar,
   show_default=True,
   help=click_utils.show_help(types.DataStore))
 @click.option('--density', 'opt_density',
   default=click_utils.get_default(types.KeyframeMetadata.EXPANDED),
   show_default=True,
-  type=click_utils.KeyframeVar,
+  type=cfg.KeyframeMetadataVar,
   help=click_utils.show_help(types.KeyframeMetadata))
 @click.option('--size', 'opt_size',
-  type=click_utils.ImageSizeVar,
+  type=cfg.ImageSizeVar,
   default=click_utils.get_default(types.ImageSize.LARGE),
   help=click_utils.show_help(types.ImageSize))
 @click.pass_context
@@ -47,7 +48,6 @@ def cli(ctx, fp_neg_list, dir_project, opt_verified, opt_disk, opt_density, opt_
   from glob import glob
   from pathlib import Path
 
-  from vframe.settings import vframe_cfg as cfg
   from vframe.utils import logger_utils, im_utils, file_utils
   from vframe.settings.paths import Paths
 
