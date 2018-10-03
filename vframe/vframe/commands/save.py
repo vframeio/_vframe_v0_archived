@@ -41,9 +41,11 @@ from cli_vframe import processor
   help='Minify output if using JSON')
 @click.option('-f', '--force', 'opt_force', is_flag=True,
   help='Force overwrite')
+@click.option('--suffix', 'opt_suffix', default=None,
+  help='Force overwrite')
 @processor
 @click.pass_context
-def cli(ctx, sink, fp_out, opt_format, opt_disk, opt_metadata_type, opt_minify, opt_force):
+def cli(ctx, sink, fp_out, opt_format, opt_disk, opt_metadata_type, opt_minify, opt_force, opt_suffix):
   """Writes items to disk as JSON or Pickle"""
 
   from vframe.utils import logger_utils
@@ -54,6 +56,9 @@ def cli(ctx, sink, fp_out, opt_format, opt_disk, opt_metadata_type, opt_minify, 
   if not fp_out:
     fp_out = Paths.metadata_index(opt_metadata_type, data_store=opt_disk, 
       file_format=opt_format, verified=ctx.opts['verified'])
+    if opt_suffix:
+      fpp_out = Path(fp_out)
+      fp_out = join(str(fpp_out.parent), '{}_{}{}'.format(fpp_out.stem, opt_suffix, fpp_out.suffix))
   
   if Path(fp_out).exists() and not opt_force:
     m = 'File "{}" exists. Use "-f" to override'.format(fp_out)

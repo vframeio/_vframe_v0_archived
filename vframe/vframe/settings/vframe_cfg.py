@@ -13,8 +13,8 @@ from vframe.utils import click_utils
 # Enun lists used for custom Click Params
 # -----------------------------------------------------------------------------
 
-DarknetClassifyVar = click_utils.ParamVar(types.DarknetClassify)
-DarknetDetectVar = click_utils.ParamVar(types.DarknetDetect)
+ClassifyNetVar = click_utils.ParamVar(types.ClassifyNet)
+DetectorNetVar = click_utils.ParamVar(types.DetectorNet)
 PyTorchNetVar = click_utils.ParamVar(types.PyTorchNet)
 KerasNetVar = click_utils.ParamVar(types.KerasNet)
 
@@ -33,7 +33,7 @@ VerifiedVar = click_utils.ParamVar(types.Verified)
 MediaFormatVar = click_utils.ParamVar(types.MediaFormat)
 MetadataVar = click_utils.ParamVar(types.Metadata)
 LogLevelVar = click_utils.ParamVar(types.LogLevel)
-
+ActionVar = click_utils.ParamVar(types.Action)
 
 
 # # data_store

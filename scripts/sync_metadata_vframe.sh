@@ -9,22 +9,54 @@
 # ---------------------------------------------------------------------------
 # get input for extension, verified, and direction
 
-usage() { echo "Usage: $0 [-s <pkl|json>] [-s <verified|unverified>] [-d <r2l|l2r>]" 1>&2; exit 1; }
+usage() { echo "Usage: $0 [-s <pkl|json>] [-s <verified|unverified>] [-d <r2l|l2r>] -t \"<metadata_type>\"" 1>&2; exit 1; }
 
-while getopts ":e:v:d:" o; do
+# ---------------------------------------------------------------------------
+# checks if array contains a value
+# @paolo-tedesco https://stackoverflow.com/questions/3685970/check-if-a-bash-array-contains-a-value
+
+function contains() {
+    local n=$#
+    local value=${!n}
+    for ((i=1;i < $#;i++)) {
+        if [ "${!i}" == "${value}" ]; then
+            echo "y"
+            return 0
+        fi
+    }
+    echo "n"
+    return 1
+}
+
+
+# ---------------------------------------------------------------------------
+# echo colors
+
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+
+# ---------------------------------------------------------------------------
+# iterated through cli options
+
+while getopts ":e:v:d:t:" o; do
     case "${o}" in
         e)
             e=${OPTARG}
-            ((e == pkl || e == json)) || usage
+            # ((e == pkl || e == json)) || usage
             ;;
         v)
             v=${OPTARG}
-            ((v == verified || v == uverified)) || usage
+            # ((v == verified || v == uverified)) || usage
             ;;
 
         d)
             d=${OPTARG}
-            ((d == r2l || d == l2r)) || usage
+            # ((d == r2l || d == l2r)) || usage
+            ;;
+        t)
+            t=${OPTARG}
+            metadata_types=($t)
             ;;
         *)
             usage
@@ -33,33 +65,75 @@ while getopts ":e:v:d:" o; do
 done
 shift $((OPTIND-1))
 
-if [ -z "${e}" ] || [ -z "${v}" ] || [ -z "${d}" ]; then
+
+# ---------------------------------------------------------------------------
+# set default values for args
+
+# force metadata type input
+if [ -z "${t}" ]; then
     usage
+fi
+
+# set default values for local
+if [ -z "${e}" ]; then
+    e="pkl"
+fi
+
+# set default values for verified
+if [ -z "${v}" ]; then
+    v="verified"
+fi
+
+# set default for verified
+if [ -z "${d}" ]; then
+    d="l2r"
 fi
 
 
 # ---------------------------------------------------------------------------
-# set vars and iterate metadata directories
+# ensure environment variables were set for metadata locations
 
-metadata_src=/data_store_ssd/apps/syrianarchive/metadata
-metadata_dst=/data_store/apps/syrianarchive/metadata
+# TODO change these to env vars
+if [ -z "${METADATA_LOCAL}" ]; then
+    printf "${RED}Error: ${NC} METADATA_LOCAL was not set\n"
+    printf "export METADATA_LOCAL=/local/path/to/your/metadata\n"
+    printf "or $ source env/metadata.env\n"
+    exit 0
+fi
+if [ -z "${METADATA_REMOTE}" ]; then
+    printf "${RED}Error: ${NC} METADATA_LOCAL was not set\n"
+    printf "export METADATA_REMOTE=/remote/path/to/your/metadata\n"
+    printf "or $ source env/metadata.env\n"
+    exit 0
+fi
 
-#for t in mediainfo keyframe keyframe_status coco places365 media_record sugarcube openimages feature_vgg16 feature_pt_resnet18 feature_pt_alexnet
-for t in feature_resnet18 feature_alexnet
+# ---------------------------------------------------------------------------
+# set accepted types of metadata that can be synced
+valid_types=("feature_alexnet" "feature_resnet18" "mediainfo" "keyframe" "keyframe_status" "coco" "places365" "media_record" "sugarcube" "openimages" "submunition")
+
+
+for t in "${metadata_types[@]}"
 do
+    if [ $(contains "${valid_types[@]}" $t) == "n" ]; then
+        printf "${RED}Error: ${NC} \"${t}\" is not a valid metadata type\n"
+        continue
+    fi
+
     echo '-------------------------------------------------------------------'
     echo "Syncing $t"
     
     if [ "$d" == "l2r" ]; then
-        src=$metadata_src/$t/$v/*.$e
-        dst=$metadata_dst/$t/$v/
-		echo "Sync remote to local: $src --> $dst"
+        src=$METADATA_LOCAL/$t/$v/*.$e
+        dst=$METADATA_REMOTE/$t/$v/
+		echo "local to remote: $src --> $dst"
+        echo '-------------------------------------------------------------------'
 		rsync -avz --progress $src vframe-adam:$dst
 	else
-        src=$metadata_dst/$t/$v/*.$e
-        dst=$metadata_src/$t/$v/
-		echo "Sync remote to local: $src --> $dst"
-		mkdir -p $metadata_src/$t/$v/
+        src=$METADATA_REMOTE/$t/$v/*.$e
+        dst=$METADATA_LOCAL/$t/$v/
+		echo "remote to local: $src --> $dst"
+        echo '-------------------------------------------------------------------'
+		mkdir -p $METADATA_LOCAL/$t/$v/
 		rsync -avz --progress vframe-adam:$src $dst
 	fi
 done

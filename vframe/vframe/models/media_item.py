@@ -79,7 +79,7 @@ class MediaRecordItem:
         mapped[types.Metadata.KEYFRAME_STATUS] = KeyframeStatusMetadataItem.from_dict(v) 
       elif k == types.Metadata.FEATURE_VGG16.name.lower():
         mapped[types.Metadata.FEATURE_VGG16] = FeatureMetadataItem.from_dict(v) 
-      elif k == types.Metadata.FEATURE_PT_RESNET18.name.lower():
+      elif k == types.Metadata.FEATURE_RESNET18.name.lower():
         mapped[types.Metadata.FEATURE_RESNET18] = FeatureMetadataItem.from_dict(v) 
       elif k == types.Metadata.PLACES365.name.lower():
         mapped[types.Metadata.PLACES365] = ClassifyMetadataItem.from_dict(v) 

@@ -40,7 +40,8 @@ class Img2Vec():
             image = Variable(self.normalize(self.to_tensor(self.scaler(img))).unsqueeze(0))
 
         print(self.layer_output_size)
-        my_embedding = torch.zeros(self.layer_output_size)
+        # my_embedding = torch.zeros(self.layer_output_size)
+        my_embedding = torch.zeros(1, self.layer_output_size, 1, 1)
 
         def copy_data(m, i, o):
             my_embedding.copy_(o.data)

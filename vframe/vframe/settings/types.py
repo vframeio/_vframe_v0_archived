@@ -59,11 +59,11 @@ class KeyframeMetadata(Enum):
 # -------------------------------------------------------------------
 # Object detection and classification networks
 
-class DarknetClassify(Enum):
+class ClassifyNet(Enum):
   """Darknet networks"""
-  IMAGENET = 1
+  IMAGENET, PLACES365 = range(2)
 
-class DarknetDetect(Enum):
+class DetectorNet(Enum):
   """Darknet networks"""
   COCO, COCO_SPP, VOC, OPENIMAGES, SUBMUNITION = range(5)
 
@@ -97,6 +97,9 @@ class MetadataStatus(Enum):
   """Metadata analysis status"""
   INVALID, VALID, UNSET = range(3)
 
+class Action(Enum):
+  """Describe different types of pipeline actions"""
+  ADD, RM = range(2)
 
 # ---------------------------------------------------------------------
 # File Types and Paths

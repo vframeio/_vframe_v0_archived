@@ -69,8 +69,9 @@ def cli(ctx, sink, fp_in, fp_out, opt_disk, opt_format_in, opt_format_out,
   log = logger_utils.Logger.getLogger()
 
   if not opt_metadata_type and not fp_in:
-    log.error('Missing output path or metadata type')
-    ctx.fail('Error: missing option for either "-t" / "--type" or "-i" / "--input"')
+    # TODO create custom exception
+    log.error('Error: missing option for either "-t" / "--type" or "-i" / "--input"')
+    return
 
   if not fp_in:
     fp_in = Paths.metadata_index(opt_metadata_type, data_store=opt_disk, 

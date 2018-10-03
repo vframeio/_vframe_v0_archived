@@ -31,60 +31,60 @@ class Paths:
   # Darknet Paths
 
   @classmethod
-  def darknet_classes(cls, data_store=types.DataStore.HDD, opt_net=types.DarknetDetect.COCO):
-    if opt_net == types.DarknetDetect.COCO:
+  def darknet_classes(cls, data_store=types.DataStore.HDD, opt_net=types.DetectorNet.COCO):
+    if opt_net == types.DetectorNet.COCO:
       fp = join(cls.DIR_DARKNET, 'data', 'coco.names')
-    elif opt_net == types.DarknetDetect.COCO_SPP:
+    elif opt_net == types.DetectorNet.COCO_SPP:
       fp = join(cls.DIR_DARKNET, 'data', 'coco.names')
-    elif opt_net == types.DarknetDetect.VOC:
+    elif opt_net == types.DetectorNet.VOC:
       fp = join(cls.DIR_DARKNET, 'data', 'voc.names')
-    elif opt_net == types.DarknetDetect.OPENIMAGES:
+    elif opt_net == types.DetectorNet.OPENIMAGES:
       fp = join(cls.DIR_DARKNET, 'data', 'openimages.names')
-    elif opt_net == types.DarknetDetect.SUBMUNITION:
+    elif opt_net == types.DetectorNet.SUBMUNITION:
       fp = join(cls.DIR_DARKNET_VFRAME, 'cluster_munition_07', 'classes.txt')
     return join(cls.DataStorePath(data_store), fp)
 
   @classmethod
-  def darknet_data(cls, data_store=types.DataStore.HDD, opt_net=types.DarknetDetect.COCO):
-    if opt_net == types.DarknetDetect.COCO:
+  def darknet_data(cls, data_store=types.DataStore.HDD, opt_net=types.DetectorNet.COCO):
+    if opt_net == types.DetectorNet.COCO:
       fp = join(cls.DIR_DARKNET, 'cfg', 'coco.data')
-    elif opt_net == types.DarknetDetect.COCO_SPP:
+    elif opt_net == types.DetectorNet.COCO_SPP:
       fp = join(cls.DIR_DARKNET, 'cfg', 'coco.data')
-    elif opt_net == types.DarknetDetect.VOC:
+    elif opt_net == types.DetectorNet.VOC:
       fp = join(cls.DIR_DARKNET, 'cfg', 'voc.data')
-    elif opt_net == types.DarknetDetect.OPENIMAGES:
+    elif opt_net == types.DetectorNet.OPENIMAGES:
       fp = join(cls.DIR_DARKNET, 'cfg', 'openimages.data')
-    elif opt_net == types.DarknetDetect.SUBMUNITION:
+    elif opt_net == types.DetectorNet.SUBMUNITION:
       fp = join(cls.DIR_DARKNET_VFRAME, 'cluster_munition_07', 'meta.data')
     fp = join(cls.DataStorePath(data_store), fp)
     return bytes(fp, encoding="utf-8")
 
   @classmethod
-  def darknet_cfg(cls, data_store=types.DataStore.HDD, opt_net=types.DarknetDetect.COCO):
-    if opt_net == types.DarknetDetect.COCO:
+  def darknet_cfg(cls, data_store=types.DataStore.HDD, opt_net=types.DetectorNet.COCO):
+    if opt_net == types.DetectorNet.COCO:
       fp = join(cls.DIR_DARKNET, 'cfg', 'yolov3.cfg')
-    elif opt_net == types.DarknetDetect.COCO_SPP:
+    elif opt_net == types.DetectorNet.COCO_SPP:
       fp = join(cls.DIR_DARKNET, 'cfg', 'yolov3-spp.cfg')
-    elif opt_net == types.DarknetDetect.VOC:
+    elif opt_net == types.DetectorNet.VOC:
       fp = join(cls.DIR_DARKNET, 'cfg', 'yolov3-voc.cfg')
-    elif opt_net == types.DarknetDetect.OPENIMAGES:
+    elif opt_net == types.DetectorNet.OPENIMAGES:
       fp = join(cls.DIR_DARKNET, 'cfg', 'yolov3-openimages.cfg')
-    elif opt_net == types.DarknetDetect.SUBMUNITION:
+    elif opt_net == types.DetectorNet.SUBMUNITION:
       fp = join(cls.DIR_DARKNET_VFRAME, 'cluster_munition_07', 'yolov3.cfg')
     fp = join(cls.DataStorePath(data_store), fp)
     return bytes(fp, encoding="utf-8")
 
   @classmethod
-  def darknet_weights(cls, data_store=types.DataStore.HDD, opt_net=types.DarknetDetect.COCO):
-    if opt_net == types.DarknetDetect.COCO:
+  def darknet_weights(cls, data_store=types.DataStore.HDD, opt_net=types.DetectorNet.COCO):
+    if opt_net == types.DetectorNet.COCO:
       fp = join(cls.DIR_DARKNET, 'weights', 'yolov3.weights')
-    elif opt_net == types.DarknetDetect.COCO_SPP:
+    elif opt_net == types.DetectorNet.COCO_SPP:
       fp = join(cls.DIR_DARKNET, 'weights', 'yolov3-spp.weights')
-    elif opt_net == types.DarknetDetect.VOC:
+    elif opt_net == types.DetectorNet.VOC:
       fp = join(cls.DIR_DARKNET, 'weights', 'yolov3-voc.weights')
-    elif opt_net == types.DarknetDetect.OPENIMAGES:
+    elif opt_net == types.DetectorNet.OPENIMAGES:
       fp = join(cls.DIR_DARKNET, 'weights', 'yolov3-openimages.weights')
-    elif opt_net == types.DarknetDetect.SUBMUNITION:
+    elif opt_net == types.DetectorNet.SUBMUNITION:
       fp = join(cls.DIR_DARKNET_VFRAME, 'cluster_munition_07/weights', 'yolov3_11000.weights')
     fp = join(cls.DataStorePath(data_store), fp)
     return bytes(fp, encoding="utf-8")

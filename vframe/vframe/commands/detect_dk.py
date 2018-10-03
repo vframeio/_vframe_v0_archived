@@ -30,9 +30,9 @@ from cli_vframe import processor
   default=click_utils.get_default(types.ImageSize.MEDIUM),
   help=click_utils.show_help(types.ImageSize))
 @click.option('-t', '--net-type', 'opt_net',
-  type=cfg.DarknetDetectVar,
-  default=click_utils.get_default(types.DarknetDetect.SUBMUNITION),
-  help=click_utils.show_help(types.DarknetDetect))
+  type=cfg.DetectorNetVar,
+  default=click_utils.get_default(types.DetectorNet.SUBMUNITION),
+  help=click_utils.show_help(types.DetectorNet))
 @click.option('--display/--no-display', 'opt_display', is_flag=True, 
   help='Display the image')
 @click.option('--delay', 'opt_delay', default=250,
@@ -103,23 +103,23 @@ def cli(ctx, sink, opt_disk, opt_density, opt_size, opt_net, opt_display,
 
 
   # Use mulitples of 32: 416, 448, 480, 512, 544, 576, 608, 640, 672, 704
-  if opt_net == types.DarknetDetect.OPENIMAGES:
+  if opt_net == types.DetectorNet.OPENIMAGES:
     metadata_type = types.Metadata.OPENIMAGES
     dnn_size = (608, 608)
     dnn_threshold = 0.875
-  elif  opt_net == types.DarknetDetect.COCO:
+  elif  opt_net == types.DetectorNet.COCO:
     metadata_type = types.Metadata.COCO
     dnn_size = (416, 416)
     dnn_threshold = 0.925
-  elif  opt_net == types.DarknetDetect.COCO_SPP:
+  elif  opt_net == types.DetectorNet.COCO_SPP:
     metadata_type = types.Metadata.COCO
     dnn_size = (608, 608)
     dnn_threshold = 0.875
-  elif  opt_net == types.DarknetDetect.VOC:
+  elif  opt_net == types.DetectorNet.VOC:
     metadata_type = types.Metadata.VOC
     dnn_size = (416, 416)
     dnn_threshold = 0.875
-  elif  opt_net == types.DarknetDetect.SUBMUNITION:
+  elif  opt_net == types.DetectorNet.SUBMUNITION:
     metadata_type = types.Metadata.SUBMUNITION
     dnn_size = (608, 608)
     dnn_threshold = 0.90
@@ -149,91 +149,41 @@ def cli(ctx, sink, opt_disk, opt_density, opt_size, opt_net, opt_display,
   while True:
 
     chair_item = yield
-    media_record = chair_item.media_record
-    sha256 = media_record.sha256
-    sha256_tree = file_utils.sha256_tree(sha256)
-    dir_sha256 = join(dir_media, sha256_tree, sha256)
     
-    # get the keyframe status data to check if images available
-    try:
-      keyframe_status = media_record.get_metadata(types.Metadata.KEYFRAME_STATUS)
-    except Exception as ex:
-      log.error('no keyframe metadata. Try: "append -t keyframe_status"')
-      return
-
-    # if keyframe images were generated and exist locally
     metadata = {}
-    if keyframe_status and keyframe_status.get_status(opt_size):
+
+    for frame_idx, frame in chair_item.keyframes.items():
+    
+      # -------------------------------------------
+      # Start DNN
       
-      keyframe_metadata = media_record.get_metadata(types.Metadata.KEYFRAME)
+      frame = im_utils.resize(frame, width=dnn_size[0], height=dnn_size[1])
+      imh, imw = frame.shape[:2]
+      frame_dk = DarknetImage(frame)
+      net_outputs = net.detect(frame_dk, thresh=conf_thresh, hier_thresh=hier_thresh, nms=nms_thresh)
+      # threshold
+      net_outputs = [x for x in  net_outputs if float(x[1]) > dnn_threshold]
+
+      # append as metadata
+      det_results = []
+      for cat, score, bounds in net_outputs:
+        cx, cy, w, h = bounds
+        # TODO convert to BBox()
+        x1, y1 = ( int(max(cx - w / 2, 0)), int(max(cy - h / 2, 0)) )
+        x2, y2 = ( int(min(cx + w / 2, imw)), int(min(cy + h / 2, imh)) )
+        class_idx = class_idx_lookup[cat.decode("utf-8")]
+        rect_norm = (x1/imw, y1/imh, x2/imw, y2/imh)
+        det_results.append( DetectResult(class_idx, float(score), rect_norm) )
+        
+      # display to screen
+      # TODO: replace this with drawing functions
       
-      if not keyframe_metadata:
-        log.error('no keyframe metadata. Try: "append -t keyframe"')
-        return
-
-      # get keyframe indices
-      idxs = keyframe_metadata.get_keyframes(opt_density)
-
-      for frame_idx in idxs:
-        # get keyframe filepath
-        fp_keyframe = join(dir_sha256, file_utils.zpad(frame_idx), opt_size_label, 'index.jpg')
-        try:
-          im = cv.imread(fp_keyframe)
-          im.shape  # used to invoke error if file didn't load correctly
-        except:
-          log.warn('file not found: {}'.format(fp_keyframe))
-          continue
-
-        # -------------------------------------------
-        # Start DNN
-        im_sm = im_utils.resize(im, width=dnn_size[0], height=dnn_size[1])
-        imh, imw = im_sm.shape[:2]
-        im_dk = DarknetImage(im_sm)
-        net_outputs = net.detect(im_dk, thresh=conf_thresh, hier_thresh=hier_thresh, nms=nms_thresh)
-        # threshold
-        net_outputs = [x for x in  net_outputs if float(x[1]) > dnn_threshold]
-
-        # append as metadata
-        det_results = []
-        for cat, score, bounds in net_outputs:
-          cx, cy, w, h = bounds
-          # TODO convert to BBox()
-          x1, y1 = ( int(max(cx - w / 2, 0)), int(max(cy - h / 2, 0)) )
-          x2, y2 = ( int(min(cx + w / 2, imw)), int(min(cy + h / 2, imh)) )
-          class_idx = class_idx_lookup[cat.decode("utf-8")]
-          rect_norm = (x1/imw, y1/imh, x2/imw, y2/imh)
-          det_results.append( DetectResult(class_idx, float(score), rect_norm) )
-          
-        # display to screen
-        # TODO: replace this with drawing functions
-        if opt_display and len(net_outputs) > 1:
-          
-          im_dst = im_sm.copy()
-          for cat, score, bounds in net_outputs:
-            cx, cy, w, h = bounds
-            # TODO convert to BBox()
-            x1, y1 = ( int(max(cx - w / 2, 0)), int(max(cy - h / 2, 0)) )
-            x2, y2 = ( int(min(cx + w / 2, imw)), int(min(cy + h / 2, imh)) )
-            # TODO convert to drawing processor
-            cv.rectangle(im_dst, (x1, y1), (x2, y2) , (0, 255, 0), thickness=2)
-            label = str(cat.decode("utf-8"))
-            label_idx = class_idx_lookup[label]
-            label = '{} ({:.2f})'.format(class_names[label_idx].upper(), float(score))
-            twh = cv.getTextSize(label, cv.FONT_HERSHEY_SIMPLEX, .4, 1)
-            cv.rectangle(im_dst, (x1, y1), (x1+twh[0][0]+5, y1+twh[0][1]+5) , (0, 255, 0), -1)
-            cv.putText(im_dst, label, (int(x1+2),int(y1+13)),cv.FONT_HERSHEY_SIMPLEX,.4,(0,0,0), 1)
-
-          cv.imshow('frame'.format(frame_idx), im_dst)
-          k = cv.waitKey(opt_delay)
-          if k == 27 or k == ord('q'):  # ESC
-            # exits the app
-            cv.destroyAllWindows()
-            return
-
-        metadata[frame_idx] = det_results
+      metadata[frame_idx] = det_results
     
     # append metadata to chair_item's mapping item
-    chair_item.item.set_metadata(metadata_type, DetectMetadataItem(metadata))
+    #log.debug('metadata: {}'.format(metadata))
+
+    chair_item.set_metadata(metadata_type, DetectMetadataItem(metadata))
   
 
     # send back to generator
