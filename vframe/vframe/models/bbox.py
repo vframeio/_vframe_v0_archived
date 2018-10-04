@@ -98,6 +98,8 @@ class BBox:
   
   # -----------------------------------------------------------------
   # Convert to
+  def as_box(self):
+    return (self._x1, self._y1, self._x2, self._y2)
 
   def as_haar(self):
     """Converts BBox back to haar type"""
@@ -148,3 +150,6 @@ class BBox:
     y1 = int(ny1 * imh)
     y2 = int(ny2 * imh)
     return cls(x1, y1, x2, y2, imw, imh)
+
+  def str(self):
+    return self.as_box()

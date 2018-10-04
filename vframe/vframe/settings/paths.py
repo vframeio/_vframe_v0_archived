@@ -45,7 +45,7 @@ class Paths:
     return join(cls.DataStorePath(data_store), fp)
 
   @classmethod
-  def darknet_data(cls, data_store=types.DataStore.HDD, opt_net=types.DetectorNet.COCO):
+  def darknet_data(cls, data_store=types.DataStore.HDD, opt_net=types.DetectorNet.COCO, as_bytes=True):
     if opt_net == types.DetectorNet.COCO:
       fp = join(cls.DIR_DARKNET, 'cfg', 'coco.data')
     elif opt_net == types.DetectorNet.COCO_SPP:
@@ -57,10 +57,14 @@ class Paths:
     elif opt_net == types.DetectorNet.SUBMUNITION:
       fp = join(cls.DIR_DARKNET_VFRAME, 'cluster_munition_07', 'meta.data')
     fp = join(cls.DataStorePath(data_store), fp)
-    return bytes(fp, encoding="utf-8")
+    if as_bytes:
+      return bytes(fp, encoding="utf-8")
+    else:
+      return fp
+
 
   @classmethod
-  def darknet_cfg(cls, data_store=types.DataStore.HDD, opt_net=types.DetectorNet.COCO):
+  def darknet_cfg(cls, data_store=types.DataStore.HDD, opt_net=types.DetectorNet.COCO, as_bytes=True):
     if opt_net == types.DetectorNet.COCO:
       fp = join(cls.DIR_DARKNET, 'cfg', 'yolov3.cfg')
     elif opt_net == types.DetectorNet.COCO_SPP:
@@ -72,10 +76,13 @@ class Paths:
     elif opt_net == types.DetectorNet.SUBMUNITION:
       fp = join(cls.DIR_DARKNET_VFRAME, 'cluster_munition_07', 'yolov3.cfg')
     fp = join(cls.DataStorePath(data_store), fp)
-    return bytes(fp, encoding="utf-8")
+    if as_bytes:
+      return bytes(fp, encoding="utf-8")
+    else:
+      return fp
 
   @classmethod
-  def darknet_weights(cls, data_store=types.DataStore.HDD, opt_net=types.DetectorNet.COCO):
+  def darknet_weights(cls, data_store=types.DataStore.HDD, opt_net=types.DetectorNet.COCO, as_bytes=True):
     if opt_net == types.DetectorNet.COCO:
       fp = join(cls.DIR_DARKNET, 'weights', 'yolov3.weights')
     elif opt_net == types.DetectorNet.COCO_SPP:
@@ -85,9 +92,12 @@ class Paths:
     elif opt_net == types.DetectorNet.OPENIMAGES:
       fp = join(cls.DIR_DARKNET, 'weights', 'yolov3-openimages.weights')
     elif opt_net == types.DetectorNet.SUBMUNITION:
-      fp = join(cls.DIR_DARKNET_VFRAME, 'cluster_munition_07/weights', 'yolov3_11000.weights')
+      fp = join(cls.DIR_DARKNET_VFRAME, 'cluster_munition_07/weights', 'yolov3_23000.weights')
     fp = join(cls.DataStorePath(data_store), fp)
-    return bytes(fp, encoding="utf-8")
+    if as_bytes:
+      return bytes(fp, encoding="utf-8")
+    else:
+      return fp
 
   # -------------------------------------------------------------------------------
   # Metadata Paths

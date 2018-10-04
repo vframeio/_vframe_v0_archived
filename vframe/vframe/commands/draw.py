@@ -122,7 +122,7 @@ def cli(ctx, sink, opt_action, opt_net, opt_disk, opt_color):
 
           # prepare label
           label = '{} ({:.2f})'.format(classes[class_idx].upper(), float(score))
-          log.debug('label: {}'.format(label))
+          log.debug('label: {}, bbox: {}'.format(label, str(bbox.as_box())))
           tw, th = cv.getTextSize(label, cv.FONT_HERSHEY_SIMPLEX, tx_scale, tx_weight)[0]
           
           # draw label bg
@@ -148,6 +148,3 @@ def cli(ctx, sink, opt_action, opt_net, opt_disk, opt_color):
     # ------------------------------------------------
     # rebuild the generator
     sink.send(chair_item)
-
-  # this makes it wait forever
-  cv2.waitKey(0)

@@ -14,38 +14,23 @@ from vframe.settings import vframe_cfg as cfg
 from cli_vframe import processor
 
 
-@click.command('gen_darknet_coco')
+@click.command()
 @click.option('-d', '--disk', 'opt_disk',
   default=click_utils.get_default(types.DataStore.SSD),
   type=cfg.DataStoreVar,
   show_default=True,
   help=click_utils.show_help(types.DataStore))
-@click.option('--density', 'opt_density',
-  default=click_utils.get_default(types.KeyframeMetadata.BASIC),
-  show_default=True,
-  type=cfg.KeyframeMetadataVar,
-  help=click_utils.show_help(types.KeyframeMetadata))
-@click.option('--size', 'opt_size',
-  type=cfg.ImageSizeVar,
-  default=click_utils.get_default(types.ImageSize.MEDIUM),
-  help=click_utils.show_help(types.ImageSize))
 @click.option('-t', '--net-type', 'opt_net',
   type=cfg.DetectorNetVar,
   default=click_utils.get_default(types.DetectorNet.SUBMUNITION),
   help=click_utils.show_help(types.DetectorNet))
-@click.option('--display/--no-display', 'opt_display', is_flag=True, 
-  help='Display the image')
-@click.option('--delay', 'opt_delay', default=250,
-  help='Millisecond delay between images if display')
 @click.option('-g', '--gpu', 'opt_gpu', default=0,
   help='GPU index')
 @processor
 @click.pass_context
-def cli(ctx, sink, opt_disk, opt_density, opt_size, opt_net, opt_display, 
-  opt_delay, opt_gpu):
+def cli(ctx, sink, opt_disk, opt_net, opt_gpu):
   """Generates detections with Darknet"""
 
-  
   # -------------------------------------------------
   # imports 
 
@@ -76,12 +61,6 @@ def cli(ctx, sink, opt_disk, opt_density, opt_size, opt_net, opt_display,
   # initialize
 
   log = logger_utils.Logger.getLogger()
-
-
-  # process keyframes
-  dir_media = Paths.media_dir(types.Metadata.KEYFRAME, data_store=opt_disk, 
-    verified=ctx.opts['verified'])
-  opt_size_label = cfg.IMAGE_SIZE_LABELS[opt_size]
 
   # Initialize the parameters
   fp_cfg = Paths.darknet_cfg(opt_net=opt_net, data_store=opt_disk)

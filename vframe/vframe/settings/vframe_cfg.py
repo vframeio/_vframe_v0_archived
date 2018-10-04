@@ -9,6 +9,7 @@ from vframe.settings import types
 from vframe.models.video_item import VideoQuality
 from vframe.utils import click_utils
 
+
 # -----------------------------------------------------------------------------
 # Enun lists used for custom Click Params
 # -----------------------------------------------------------------------------
@@ -55,6 +56,12 @@ DIR_MODELS_PYTORCH = join(DIR_MODELS_VFRAME,'pytorch')
 DIR_MODELS_TORCH = join(DIR_MODELS_VFRAME,'torch')
 DIR_MODELS_MXNET = join(DIR_MODELS_VFRAME,'mxnet')
 DIR_MODELS_TF = join(DIR_MODELS_VFRAME,'tensorflow')
+
+# -----------------------------------------------------------------------------
+# Drawing, GUI settings
+# -----------------------------------------------------------------------------
+DIR_ASSETS = join(DIR_APP_VFRAME, 'assets')
+FP_FONT = join(DIR_ASSETS, 'font')
 
 
 # -----------------------------------------------------------------------------

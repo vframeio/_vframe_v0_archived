@@ -19,11 +19,9 @@ from cli_vframe import processor
   type=click.IntRange(1, 1000),
   show_default=True,
   help='Delay between images in millis. 1 is fastest.')
-@click.option('--dispose/--no-dispose', 'opt_dispose', is_flag=True, default=True,
-  help='Dispose image after display to free RAM')
 @processor
 @click.pass_context
-def cli(ctx, sink, opt_delay, opt_dispose):
+def cli(ctx, sink, opt_delay):
   """Displays images"""
   
   # -------------------------------------------------

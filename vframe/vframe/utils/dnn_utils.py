@@ -1,6 +1,8 @@
 import cv2 as cv
 import numpy as np
 
+from vframe.models.metadata_item import DetectResult
+
 # NMS post processing functions by @spmallick 
 # https://github.com/spmallick/learnopencv/tree/master/ObjectDetection-YOLO
 # https://www.learnopencv.com/deep-learning-based-object-detection-using-yolov3-with-opencv-python-c/
@@ -14,9 +16,7 @@ def getOutputsNames(net):
   return [layersNames[i[0] - 1] for i in net.getUnconnectedOutLayers()]
 
 
-def post_process(im, net_outputs, dnn_threshold, nms_threshold):
-  im_h, im_w = im.shape[:2]
-
+def nms_cvdnn(net_outputs, dnn_threshold, nms_threshold):
   # Scan through all the bounding boxes output from the network and keep only the
   # ones with high confidence scores. Assign the box's class label as the class with the highest score.
   class_ids = []
@@ -28,15 +28,17 @@ def post_process(im, net_outputs, dnn_threshold, nms_threshold):
       class_id = np.argmax(scores)
       confidence = scores[class_id]
       if confidence > dnn_threshold:
-        cx = int(detection[0] * im_w)
-        cy = int(detection[1] * im_h)
-        w = int(detection[2] * im_w)
-        h = int(detection[3] * im_h)
-        x1 = int(cx - w / 2)
-        y1 = int(cy - h / 2)
+        cx = detection[0]
+        cy = detection[1]
+        w = detection[2]
+        h = detection[3]
+        x1 = cx - w / 2
+        y1 = cy - h / 2
+        x2 = x1 + w
+        y2 = y1 + h
         class_ids.append(class_id)
         confidences.append(float(confidence))
-        boxes.append([x1, y1, w, h])
+        boxes.append([x1, y1, x2, y2])
 
   # Perform non maximum suppression to eliminate redundant overlapping boxes with
   nms_objs = cv.dnn.NMSBoxes(boxes, confidences, dnn_threshold, nms_threshold)
