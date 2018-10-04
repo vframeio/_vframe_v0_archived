@@ -35,7 +35,7 @@ from cli_vframe import processor
   type=cfg.ImageSizeVar,
   default=click_utils.get_default(types.ImageSize.MEDIUM),
   help=click_utils.show_help(types.ImageSize))
-@click.option('--drawframes', 'opt_drawframes', is_flag=True, default=False,
+@click.option('--draw', 'opt_drawframes', is_flag=True, default=False,
   help='Add drawframes if drawing')
 @processor
 @click.pass_context
@@ -58,7 +58,7 @@ def cli(ctx, sink, opt_action, opt_dir_media, opt_disk, opt_density, opt_size, o
   # initialize
 
   log = logger_utils.Logger.getLogger()
-  log.debug('append keyframe images')
+  log.debug('append images to pipeline')
 
   # process keyframes
   if not opt_dir_media:
@@ -79,48 +79,53 @@ def cli(ctx, sink, opt_action, opt_dir_media, opt_disk, opt_density, opt_size, o
     
     if opt_action == types.Action.ADD:
 
-      media_record = chair_item.media_record
-      sha256 = media_record.sha256
-      sha256_tree = file_utils.sha256_tree(sha256)
-      dir_sha256 = join(dir_media, sha256_tree, sha256)
-      
-      # get the keyframe status data to check if images available
-      try:
-        keyframe_status = media_record.get_metadata(types.Metadata.KEYFRAME_STATUS)
-      except Exception as ex:
-        log.error('no keyframe metadata. Try: "append -t keyframe_status"')
-        return
-
-      keyframes = {}
-
-      # if keyframe images were generated and exist locally
-      if keyframe_status and keyframe_status.get_status(opt_size):
-        
-        keyframe_metadata = media_record.get_metadata(types.Metadata.KEYFRAME)
-        
-        if not keyframe_metadata:
-          log.error('no keyframe metadata. Try: "append -t keyframe"')
-          return
-
-        # get keyframe indices
-        frame_idxs = keyframe_metadata.get_keyframes(opt_density)
-
-        for frame_idx in frame_idxs:
-          # get keyframe filepath
-          fp_keyframe = join(dir_sha256, file_utils.zpad(frame_idx), opt_size_label, 'index.jpg')
+      if chair_item.chair_type == types.ChairItemType.VIDEO:
+        log.debug('load_video_keyframes start')
+        chair_item.load_video_keyframes(opt_drawframes=opt_drawframes)
+        log.debug('load_video_keyframes done')
+      elif chair_item.chair_type == types.ChairItemType.MEDIA_RECORD:
+          media_record = chair_item.media_record
+          sha256 = media_record.sha256
+          sha256_tree = file_utils.sha256_tree(sha256)
+          dir_sha256 = join(dir_media, sha256_tree, sha256)
+          
+          # get the keyframe status data to check if images available
           try:
-            im = cv.imread(fp_keyframe)
-            im.shape  # used to invoke error if file didn't load correctly
-          except:
-            log.warn('file not found: {}'.format(fp_keyframe))
-            # don't add to keyframe dict
-            continue
+            keyframe_status = media_record.get_metadata(types.Metadata.KEYFRAME_STATUS)
+          except Exception as ex:
+            log.error('no keyframe metadata. Try: "append -t keyframe_status"')
+            return
 
-          keyframes[frame_idx] = im
-      
-      
-      # append metadata to chair_item's mapping item
-      chair_item.set_keyframes(keyframes, opt_drawframes)
+          keyframes = {}
+
+          # if keyframe images were generated and exist locally
+          if keyframe_status and keyframe_status.get_status(opt_size):
+            
+            keyframe_metadata = media_record.get_metadata(types.Metadata.KEYFRAME)
+            
+            if not keyframe_metadata:
+              log.error('no keyframe metadata. Try: "append -t keyframe"')
+              return
+
+            # get keyframe indices
+            frame_idxs = keyframe_metadata.get_keyframes(opt_density)
+
+            for frame_idx in frame_idxs:
+              # get keyframe filepath
+              fp_keyframe = join(dir_sha256, file_utils.zpad(frame_idx), opt_size_label, 'index.jpg')
+              try:
+                im = cv.imread(fp_keyframe)
+                im.shape  # used to invoke error if file didn't load correctly
+              except:
+                log.warn('file not found: {}'.format(fp_keyframe))
+                # don't add to keyframe dict
+                continue
+
+              keyframes[frame_idx] = im
+          
+          
+          # append metadata to chair_item's mapping item
+          chair_item.set_keyframes(keyframes, opt_drawframes)
 
     elif opt_action == types.Action.RM:
 

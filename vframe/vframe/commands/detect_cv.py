@@ -15,7 +15,7 @@ from cli_vframe import processor
 
 @click.command('gen_darknet_coco')
 @click.option('-d', '--disk', 'opt_disk',
-  default=click_utils.get_default(types.DataStore.SSD),
+  default=click_utils.get_default(types.DataStore.HDD),
   type=cfg.DataStoreVar,
   show_default=True,
   help=click_utils.show_help(types.DataStore))

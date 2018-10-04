@@ -40,4 +40,6 @@ FRAMERATE=25
 
 #cat *.tiff | ffmpeg -f image2pipe -r 25 -i - -vcodec libx264 out.mp4
 
-ffmpeg -r 25 -pattern_type glob -i '0e892a19c1742d62a943bd8ee24fe7106ef5055e25051442aa62117f2aefa6b8.mp4_frame_*.tiff' -c:v libx264 -pix_fmt yuv420p ../out.mp4
+ffmpeg -r 25 -pattern_type glob -i 'frame_*.png' -c:v libx264 -pix_fmt yuv420p ../out.mp4
+
+ffmpeg -r 60 -f image2 -s 1920x1080 -i pic%04d.png -vcodec libx264 -crf 25  -pix_fmt yuv420p test.mp4

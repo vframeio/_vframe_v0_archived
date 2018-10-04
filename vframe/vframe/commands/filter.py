@@ -76,10 +76,10 @@ def cli(ctx, sink, opt_quality_min, opt_quality_max):
   for chair_item in chair_items_copy:
 
     sha256 = chair_item.sha256
-    item = chair_item.item
+    media_record = chair_item.media_record
 
     try:
-      mediainfo = item.get_metadata(types.Metadata.MEDIAINFO)
+      mediainfo = media_record.get_metadata(types.Metadata.MEDIAINFO)
     except Exception as ex:
       log.error('"mediainfo" is required in the metadata fields')
       return

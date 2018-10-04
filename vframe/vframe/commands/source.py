@@ -39,7 +39,7 @@ def cli(ctx, sink, fp_in, opt_format, opt_disk):
 
   from vframe.settings.paths import Paths
   from vframe.utils import file_utils, logger_utils
-  from vframe.models.chair_item import ChairItem
+  from vframe.models.chair_item import MediaRecordChairItem
   from vframe.utils import logger_utils
   
   
@@ -59,7 +59,8 @@ def cli(ctx, sink, fp_in, opt_format, opt_disk):
 
   # update ctx variable
   ctx.opts['num_items'] = len(media_records)
-
+  # ctx.opts['chair_type'] = ChairItemType.MEDIA_RECORD
+  
   # begin processing
   if not media_records or not ctx.opts['num_items'] > 0:
     log.error('no media_record available to process')
@@ -67,4 +68,4 @@ def cli(ctx, sink, fp_in, opt_format, opt_disk):
   else:
     log.info('dispatching {:,} records...'.format(ctx.opts['num_items']))
     for sha256, media_record in tqdm(media_records.items()):
-      sink.send( ChairItem(ctx, media_record) )
+      sink.send( MediaRecordChairItem(ctx, media_record) )

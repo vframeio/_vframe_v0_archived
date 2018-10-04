@@ -104,12 +104,16 @@ class Action(Enum):
 # ---------------------------------------------------------------------
 # File Types and Paths
 # --------------------------------------------------------------------
+class ChairItemType(Enum):
+  """Types of chair items that flow through pipeline"""
+  MEDIA_RECORD, VIDEO, PHOTO, VIDEO_KEYFRAME = range(4)
+
 class FileExt(Enum):
   JSON, PKL = range(2)
 
 class MediaFormat(Enum):
   """Media type to be analyzed"""
-  VIDEO, KEYFRAME, PHOTO = range(3)
+  VIDEO, PHOTO = range(2)
 
 class DataStore(Enum):
   """Storage devices. Paths are symlinked to root (eg /data_store_nas)"""

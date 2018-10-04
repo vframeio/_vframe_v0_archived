@@ -4,7 +4,7 @@ Add/remove metadata to media records
 
 import click
 
-from vframe.utils import click_utils
+from vframe.utils import click_utils, draw_utils
 from vframe.settings import types
 from vframe.settings import vframe_cfg as cfg
 from vframe.models.bbox import BBox
@@ -24,14 +24,21 @@ from cli_vframe import processor
   default=click_utils.get_default(types.DetectorNet.COCO),
   help=click_utils.show_help(types.DetectorNet))
 @click.option('-d', '--disk', 'opt_disk',
-  default=click_utils.get_default(types.DataStore.SSD),
+  default=click_utils.get_default(types.DataStore.HDD),
   type=cfg.DataStoreVar,
   show_default=True,
   help=click_utils.show_help(types.DataStore))
-@click.option('-c', '--color', 'opt_color')
+@click.option('--stroke-weight', 'opt_stroke_weight', default=2,
+  help='Rectangle outline stroke weight')
+@click.option('--stroke-color', 'opt_stroke_color', 
+  type=(int, int, int), default=(0,255,0),
+  help='Rectangle color')
+@click.option('--text-color', 'opt_text_color', 
+  type=(int, int, int), default=(0,0,0),
+  help='Text color')
 @processor
 @click.pass_context
-def cli(ctx, sink, opt_action, opt_net, opt_disk, opt_color):
+def cli(ctx, sink, opt_action, opt_net, opt_disk, opt_stroke_weight, opt_stroke_color, opt_text_color):
   """Displays images"""
   
   # -------------------------------------------------
@@ -50,7 +57,7 @@ def cli(ctx, sink, opt_action, opt_net, opt_disk, opt_color):
   # init 
 
   log = logger_utils.Logger.getLogger()
-  log.info('opt_color: {}'.format(opt_color))
+  
 
   fp_classes = Paths.darknet_classes(data_store=opt_disk, opt_net=opt_net)
   classes = file_utils.load_text(fp_classes)  # returns list in idx order
@@ -70,17 +77,6 @@ def cli(ctx, sink, opt_action, opt_net, opt_disk, opt_color):
   else:
     log.error('{} not a valid type'.format(opt_net))
     return
-
-  font = cv.FONT_HERSHEY_SIMPLEX
-  tx_offset = 4
-  ty_offset = 5
-  tx2_offset = 2 * tx_offset
-  ty2_offset = 2 * ty_offset
-  tx_scale = 0.4
-  tx_clr = (0,0,0)
-  rect_clr = (0,255,0)
-  stroke_weight = 2
-  tx_weight = 1
 
   # -------------------------------------------------
   # process 
@@ -112,25 +108,10 @@ def cli(ctx, sink, opt_action, opt_net, opt_disk, opt_color):
         log.debug('detection_results: {}'.format(detection_results))
         
         for detection_result in detection_results:
-          bbox = BBox.from_norm_coords(detection_result.rect, imw, imh)
-          class_idx = detection_result.idx
-          score = detection_result.score
-          
-          # draw border
-          pt1, pt2 = bbox.pt1, bbox.pt2
-          cv.rectangle(drawframe, pt1.tuple() , pt2.tuple(), rect_clr, thickness=stroke_weight)
 
-          # prepare label
-          label = '{} ({:.2f})'.format(classes[class_idx].upper(), float(score))
-          log.debug('label: {}, bbox: {}'.format(label, str(bbox.as_box())))
-          tw, th = cv.getTextSize(label, cv.FONT_HERSHEY_SIMPLEX, tx_scale, tx_weight)[0]
+          frame = draw_utils.draw_detection_result(drawframe, classes, detection_result, imw, imh, 
+            stroke_weight=opt_stroke_weight, rect_color=opt_stroke_color, text_color=opt_text_color)
           
-          # draw label bg
-          rect_pt2 = (pt1.x + tw + tx2_offset, pt1.y + th + ty2_offset)
-          cv.rectangle(drawframe, pt1.tuple(), rect_pt2, (0, 255, 0), -1)
-          # draw label
-          cv.putText(drawframe, label, pt1.offset(tx_offset, 3*ty_offset), font, tx_scale, tx_clr, tx_weight)
-
         # add to current items drawframes dict
         drawframes[frame_idx] = drawframe
 

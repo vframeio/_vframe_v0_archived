@@ -16,7 +16,7 @@ from cli_vframe import processor
 
 @click.command()
 @click.option('-d', '--disk', 'opt_disk',
-  default=click_utils.get_default(types.DataStore.SSD),
+  default=click_utils.get_default(types.DataStore.HDD),
   type=cfg.DataStoreVar,
   show_default=True,
   help=click_utils.show_help(types.DataStore))
@@ -89,7 +89,7 @@ def cli(ctx, sink, opt_disk, opt_net, opt_gpu):
   elif  opt_net == types.DetectorNet.COCO:
     metadata_type = types.Metadata.COCO
     dnn_size = (416, 416)
-    dnn_threshold = 0.925
+    dnn_threshold = 0.955
   elif  opt_net == types.DetectorNet.COCO_SPP:
     metadata_type = types.Metadata.COCO
     dnn_size = (608, 608)
@@ -101,7 +101,7 @@ def cli(ctx, sink, opt_disk, opt_net, opt_gpu):
   elif  opt_net == types.DetectorNet.SUBMUNITION:
     metadata_type = types.Metadata.SUBMUNITION
     dnn_size = (608, 608)
-    dnn_threshold = 0.90
+    dnn_threshold = 0.7
 
     # TODO: function to collapse hierarchical detections into parent class
     # flatten hierarchical objects
