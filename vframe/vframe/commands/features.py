@@ -18,20 +18,22 @@ from cli_vframe import processor
   show_default=True,
   help=click_utils.show_help(types.DataStore))
 @click.option('-t', '--net-type', 'opt_net',
-  default=click_utils.get_default(types.PyTorchNet.RESNET18),
+  default=click_utils.get_default(types.PyTorchNet.VGG16),
   type=cfg.PyTorchNetVar,
   help=click_utils.show_help(types.PyTorchNet))
 @click.option('--gpu', 'opt_gpu', type=int, default=0,
   help='GPU index (use -1 for CPU)')
+@click.option('--normalize//no-normalize', 'opt_normalize', is_flag=True, default=True,
+  help='Normalize feature vector')
 @processor
 @click.pass_context
-def cli(ctx, sink, opt_disk, opt_net, opt_gpu):
+def cli(ctx, sink, opt_disk, opt_net, opt_gpu, opt_normalize):
   """Generates CNN features using PyTorch"""
 
   # -------------------------------------------------
   # imports
 
-  from vframe.utils import logger_utils, im_utils
+  from vframe.utils import logger_utils, im_utils, file_utils
   from vframe.models.metadata_item import FeatureMetadataItem
   from vframe.processors.feature_extractor import FeatureExtractor
   
@@ -44,6 +46,10 @@ def cli(ctx, sink, opt_disk, opt_net, opt_gpu):
     metadata_type = types.Metadata.FEATURE_RESNET18
   elif opt_net == types.PyTorchNet.ALEXNET:
     metadata_type = types.Metadata.FEATURE_ALEXNET
+  elif opt_net == types.PyTorchNet.VGG16:
+    metadata_type = types.Metadata.FEATURE_VGG16
+  elif opt_net == types.PyTorchNet.VGG19:
+    metadata_type = types.Metadata.FEATURE_VGG19
   
   log = logger_utils.Logger.getLogger()
   log.debug('PyTorch feature vectors using: {}'.format(metadata_type.name.lower()))
@@ -66,10 +72,11 @@ def cli(ctx, sink, opt_disk, opt_net, opt_gpu):
     # iterate keyframes and extract feature vectors as serialized data
     for frame_idx, frame in chair_item.keyframes.items():
       frame_pil = im_utils.ensure_pil(frame, bgr2rgb=True)
-      metadata[frame_idx] = fe.extract(frame_pil, to_list=True)
+      metadata[frame_idx] = fe.extract(frame_pil, to_list=True, normalize=opt_normalize)
     
     # append metadata to chair_item's mapping item
     chair_item.media_record.set_metadata(metadata_type, FeatureMetadataItem(metadata))
+
 
     # -------------------------------------------------   
     # send back to generator

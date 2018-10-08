@@ -58,8 +58,10 @@ def cli(ctx, sink, opt_delay):
     chair_item = yield
 
     if chair_item.chair_type == types.ChairItemType.MEDIA_RECORD:
+      log.debug('display chair media record')
       for frame_idx, frame in chair_item.drawframes.items():
         cv.imshow('vframe', frame)
+        log.debug('show frame')
         chair_utils.handle_keyboard(ctx, opt_delay)
 
     elif chair_item.chair_type == types.ChairItemType.PHOTO:
