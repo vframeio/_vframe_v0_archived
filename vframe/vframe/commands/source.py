@@ -58,6 +58,7 @@ def cli(ctx, sink, fp_in, opt_format, opt_disk):
   media_records = file_utils.load_records(fp_in)
 
   # update ctx variable
+  log.debug('set num items: {}'.format(len(media_records)))
   ctx.opts['num_items'] = len(media_records)
   # ctx.opts['chair_type'] = ChairItemType.MEDIA_RECORD
   

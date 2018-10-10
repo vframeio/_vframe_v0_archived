@@ -76,7 +76,7 @@ class KerasNet(Enum):
 
 class PyTorchNet(Enum):
   """Types of PyTorch weights for feature extractor"""
-  ALEXNET, RESNET18 = range(2)
+  ALEXNET, RESNET18, VGG16, VGG19 = range(4)
 
 # ---------------------------------------------------------------------
 # Status 

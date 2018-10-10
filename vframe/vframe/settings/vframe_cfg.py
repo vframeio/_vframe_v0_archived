@@ -38,11 +38,11 @@ ActionVar = click_utils.ParamVar(types.Action)
 
 
 # # data_store
-DATA_STORE = '/data_store/'
+DATA_STORE = '/data_store_ssd/'
 DIR_DATASETS = join(DATA_STORE,'datasets')
 DIR_APPS = join(DATA_STORE,'apps')
 DIR_APP_VFRAME = join(DIR_APPS,'vframe')
-DIR_APP_SA = join(DIR_APP_VFRAME, 'syrianarchive')
+DIR_APP_SA = join(DIR_APPS, 'syrianarchive')
 DIR_MODELS_VFRAME = join(DIR_APP_VFRAME,'models')
 DIR_MODELS_SA = join(DIR_APP_SA,'models')
 
@@ -56,6 +56,9 @@ DIR_MODELS_PYTORCH = join(DIR_MODELS_VFRAME,'pytorch')
 DIR_MODELS_TORCH = join(DIR_MODELS_VFRAME,'torch')
 DIR_MODELS_MXNET = join(DIR_MODELS_VFRAME,'mxnet')
 DIR_MODELS_TF = join(DIR_MODELS_VFRAME,'tensorflow')
+
+# Test images
+DIR_TEST_IMAGES = join(DIR_APP_SA, 'test', 'images')
 
 # -----------------------------------------------------------------------------
 # Drawing, GUI settings
@@ -82,7 +85,8 @@ SUGARCUBE_DATES = ['20180611']
 # hash trees enforce a maximum number of directories per directory
 # -----------------------------------------------------------------------------
 ZERO_PADDING = 6  # padding for enumerated image filenames
-FRAME_NAME_ZERO_PADDING = 6  # is this active??
+#FRAME_NAME_ZERO_PADDING = 6  # is this active??
+CKPT_ZERO_PADDING = 9
 HASH_TREE_DEPTH = 3
 HASH_BRANCH_SIZE = 3
 

@@ -6,10 +6,11 @@ from vframe.utils import click_utils
 from vframe.settings import vframe_cfg as cfg
 from vframe.settings import types
 
-from vframe.models.metadata_item import KeyframeMetadataItem, MediainfoMetadataItem
 from vframe.models.metadata_item import KeyframeStatusMetadataItem, ClassifyMetadataItem
+from vframe.models.metadata_item import KeyframeMetadataItem, MediainfoMetadataItem
 from vframe.models.metadata_item import FeatureMetadataItem, DetectMetadataItem
 from vframe.models.metadata_item import SugarcubeMetadataItem
+
 
 class MediaRecordItem:
   """Represents a media record (video or photo) in the VFRAME system"""
@@ -25,6 +26,9 @@ class MediaRecordItem:
   # --------------------------------------------------------------
   # metadata
   # --------------------------------------------------------------
+  def purge_metadata(self):
+    self._metadata = {}
+    
   def set_metadata(self, metadata_type, metadata):
     self._metadata[metadata_type] = metadata
 

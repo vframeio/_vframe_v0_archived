@@ -42,8 +42,8 @@ log = logging.getLogger(cfg.LOGGER_NAME)
 # File I/O read/write little helpers
 # ------------------------------------------
 
-def zpad(x):
-  return str(x).zfill(cfg.ZERO_PADDING)
+def zpad(x, num_zeros=cfg.ZERO_PADDING):
+  return str(x).zfill(num_zeros)
 
 def get_ext(fpp, lower=True):
   """Retuns the file extension w/o dot

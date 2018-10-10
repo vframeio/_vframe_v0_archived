@@ -21,8 +21,15 @@ class ChairItem(object):
     self._ctx = ctx
     self._keyframes = {}
     self._drawframes = {}
+    self._media_record = None
     self.log = logger_utils.Logger.getLogger()
 
+
+  def purge_metadata(self):
+    """Purge data to free up RAM"""
+    self._keyframes = {}
+    self._drawframes = {}
+    self._media_record = None
 
   def set_keyframes(self, keyframes, add_drawframe=False):
     """Adds dict of keyframe images"""

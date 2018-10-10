@@ -12,6 +12,6 @@ Features:
 - integration with VCAT metadata API, visual query, and annotation system
 
 
+## Getting started
 
-
-
+- Create conda environment: `conda env create -f environment.yml`

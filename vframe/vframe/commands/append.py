@@ -12,13 +12,9 @@ from cli_vframe import processor
 
 
 # --------------------------------------------------------
-# Add/remove metadata objects to chair items
+# Add metadata objects to chair items
 # --------------------------------------------------------
 @click.command()
-@click.option('-a', '--action', 'opt_action', required=True,
-  type=cfg.ActionVar,
-  default=click_utils.get_default(types.Action.ADD),
-  help=click_utils.show_help(types.Action))
 @click.option('-i', '--input', 'fp_in', default=None,  #  metadata can be filepath
   help='Override file input path')
 @click.option('-e', '--ext', 'opt_format',  # shortcut for json, pkl (no csv)
@@ -40,8 +36,8 @@ from cli_vframe import processor
   help=click_utils.show_help(types.Metadata))
 @processor
 @click.pass_context
-def cli(ctx, sink, opt_action, fp_in, opt_format, opt_disk, opt_metadata_types):
-  """Add/remove metadata to chair"""
+def cli(ctx, sink, fp_in, opt_format, opt_disk, opt_metadata_types):
+  """Add metadata to chair"""
   
   # -------------------------------------------------
   # imports 
@@ -59,7 +55,6 @@ def cli(ctx, sink, opt_action, fp_in, opt_format, opt_disk, opt_metadata_types):
   # process 
 
   log = logger_utils.Logger.getLogger()
-  log.info('opt_action: {}'.format(opt_action))
   log.info('fp_in: {}'.format(fp_in))
   log.info('opt_format: {}'.format(opt_format))
   log.info('opt_disk: {}'.format(opt_disk))
@@ -77,40 +72,24 @@ def cli(ctx, sink, opt_action, fp_in, opt_format, opt_disk, opt_metadata_types):
     except GeneratorExit as ex:
       break
 
+  # ------------------------------------------------------------------------
+  # append items
 
-  if opt_action == types.Action.ADD:
+  for opt_metadata_type, fp_in in zip(opt_metadata_types, fps_in):
+
+    log.debug('opening: {}'.format(fp_in))
+    media_records = file_utils.load_records(fp_in)
     
-    # ------------------------------------------------------------------------
-    # append items
+    if not media_records:
+      log.error('no metadata items or file. check "-d" / "--disk" and try again')
+      return
 
-    for opt_metadata_type, fp_in in zip(opt_metadata_types, fps_in):
+    log.debug('appending: {}'.format(opt_metadata_type.name.lower()))
 
-      log.debug('opening: {}'.format(fp_in))
-      media_records = file_utils.load_records(fp_in)
-      
-      if not media_records:
-        log.error('no metadata items or file. check "-d" / "--disk" and try again')
-        return
-
-      log.debug('appending: {}'.format(opt_metadata_type.name.lower()))
-
-      for chair_item in tqdm(chair_items):
-        sha256 = chair_item.sha256
-        metadata = media_records[sha256].get_metadata(opt_metadata_type)
-        chair_item.media_record.set_metadata(opt_metadata_type, metadata)
-
-  elif opt_action == types.Action.RM:
-    
-    # ------------------------------------------------------------------------
-    # remove metadata items
-
-    for opt_metadata_type in opt_metadata_types:
-      
-      log.info('removing metadata: {}'.format(opt_metadata_type))
-
-      for chair_item in chair_items:
-        chair_item.media_record.remove_metadata(opt_metadata_type)
-
+    for chair_item in tqdm(chair_items):
+      sha256 = chair_item.sha256
+      metadata = media_records[sha256].get_metadata(opt_metadata_type)
+      chair_item.media_record.set_metadata(opt_metadata_type, metadata)
 
   # ------------------------------------------------
   # rebuild the generator

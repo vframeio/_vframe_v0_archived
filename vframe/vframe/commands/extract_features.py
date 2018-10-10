@@ -72,7 +72,9 @@ def cli(ctx, sink, opt_disk, opt_net, opt_gpu, opt_normalize):
     # iterate keyframes and extract feature vectors as serialized data
     for frame_idx, frame in chair_item.keyframes.items():
       frame_pil = im_utils.ensure_pil(frame, bgr2rgb=True)
-      metadata[frame_idx] = fe.extract(frame_pil, to_list=True, normalize=opt_normalize)
+      vec = fe.extract(frame_pil, to_list=True, normalize=opt_normalize)
+      metadata[frame_idx] = vec
+
     
     # append metadata to chair_item's mapping item
     chair_item.media_record.set_metadata(metadata_type, FeatureMetadataItem(metadata))
