@@ -9,6 +9,7 @@ from vframe.utils import click_utils
 
 from cli_vframe import processor
 
+chair_items = []
 # --------------------------------------------------------
 # Save metadata to JSON/Pickle
 # --------------------------------------------------------
@@ -55,12 +56,13 @@ def cli(ctx, sink, fp_out, opt_format, opt_disk, opt_metadata_type,
   from pathlib import Path
   from collections import OrderedDict
   import gc
-
+  import copy
   import numpy as np
 
   from vframe.settings.paths import Paths
   from vframe.utils import file_utils, click_utils
   from vframe.utils import logger_utils
+  from vframe.models.chair_item import MediaRecordChairItem
   
 
   # --------------------------------------------------------
@@ -104,7 +106,7 @@ def cli(ctx, sink, fp_out, opt_format, opt_disk, opt_metadata_type,
     ckpt_fpaths = []
 
     while True:
-        
+      
       chair_item = yield
       yield_count += 1
 
@@ -122,38 +124,26 @@ def cli(ctx, sink, fp_out, opt_format, opt_disk, opt_metadata_type,
             return
 
       # accumulate chair items
-      # chair_items[chair_item.sha256] = chair_item
       chair_items.append(chair_item)
-      # ci_size = sys.getsizeof(chair_items)/1000
-      # ctx_size = sys.getsizeof(ctx)/1000
-
-      # log.debug('chair_items size: {:.2f}, ctx: {:.2f}'.format(ci_size, ctx_size))
-
 
       if (yield_count > 0 and yield_count % opt_ckpt_size == 0) or yield_count >= num_items:
         
         fp_out = ckpt_fpaths[ckpt_iter_num]
         # convert chair items to media records
         log.debug('chair_items: {}'.format(len(chair_items)))
-        # for sha256, op_chair_item in chair_items.items():
-        #   mapping_items[sha256] = op_chair_item.media_record
         mapping_items = file_utils.chair_to_mapping(chair_items)
         # write to disk
         log.debug('fp_out: {}'.format(fp_out))
         file_utils.write_serialized_items(mapping_items, fp_out, 
           ensure_path=True, minify=opt_minify)
         # clear        
-        #mapping_items = OrderedDict({})
-        #chair_items = OrderedDict({})  # reset
         mapping_items = []
+        for chair_item in chair_items:
+          chair_item.purge_metadata()
         chair_items = []
         ckpt_iter_num += 1
         # collect/empty garbage
         gc.collect()
-
-      # clear all metadata for this item to free up RAM
-      #if opt_purge:
-      #  chair_item.media_record.purge_metadata()
 
       # continue chair processors
       sink.send(chair_item)

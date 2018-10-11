@@ -75,7 +75,6 @@ def cli(ctx, sink, opt_disk, opt_net, opt_gpu, opt_normalize):
       vec = fe.extract(frame_pil, to_list=True, normalize=opt_normalize)
       metadata[frame_idx] = vec
 
-    
     # append metadata to chair_item's mapping item
     chair_item.media_record.set_metadata(metadata_type, FeatureMetadataItem(metadata))
 

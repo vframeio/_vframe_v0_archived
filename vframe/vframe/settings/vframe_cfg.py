@@ -38,7 +38,7 @@ ActionVar = click_utils.ParamVar(types.Action)
 
 
 # # data_store
-DATA_STORE = '/data_store_ssd/'
+DATA_STORE = '/data_store_hdd/'
 DIR_DATASETS = join(DATA_STORE,'datasets')
 DIR_APPS = join(DATA_STORE,'apps')
 DIR_APP_VFRAME = join(DIR_APPS,'vframe')

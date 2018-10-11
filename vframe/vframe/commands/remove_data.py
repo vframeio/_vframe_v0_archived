@@ -15,7 +15,7 @@ from cli_vframe import processor
 # remove metadata objects from chair items
 # --------------------------------------------------------
 @click.command()
-@click.option('--inline', 'opt_inline', is_flag=True, default=True,
+@click.option('--inline/--no-inline', 'opt_inline', is_flag=True, default=True,
   help='Process items inline or all at once')
 @click.option('-t', '--type', 'opt_metadata_types',
   default=None, # default uses original mappings
@@ -46,12 +46,12 @@ def cli(ctx, sink, opt_inline, opt_metadata_types):
   if opt_inline:
     
     while True:
-      
       chair_item = yield
       
       for opt_metadata_type in opt_metadata_types:
+        #log.debug('remove {} for {}'.format(opt_metadata_type.name.lower(), chair_item.sha256))
         chair_item.media_record.remove_metadata(opt_metadata_type)
-      
+
       sink.send(chair_item)
 
   else:
