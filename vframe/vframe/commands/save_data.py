@@ -129,12 +129,6 @@ def cli(ctx, sink, fp_out, opt_format, opt_disk, opt_metadata_type,
 
       # log.debug('chair_items size: {:.2f}, ctx: {:.2f}'.format(ci_size, ctx_size))
 
-      if opt_purge:
-        # chair_items[chair_item.sha256].remove_keyframes()
-        # chair_items[chair_item.sha256].remove_drawframes()
-        chair_items[-1:][0].remove_keyframes()
-        chair_items[-1:][0].remove_drawframes()
-        # chair_item.media_record.purge_metadata()
 
       if (yield_count > 0 and yield_count % opt_ckpt_size == 0) or yield_count >= num_items:
         

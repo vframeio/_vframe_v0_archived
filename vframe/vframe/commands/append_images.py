@@ -40,7 +40,7 @@ from cli_vframe import processor
 @processor
 @click.pass_context
 def cli(ctx, sink, opt_action, opt_dir_media, opt_disk, opt_density, opt_size, opt_drawframes):
-  """Loads keyframe images"""
+  """Appends images to ChairItem"""
 
   
   # -------------------------------------------------

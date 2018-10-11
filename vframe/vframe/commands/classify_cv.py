@@ -23,7 +23,7 @@ from cli_vframe import processor
 @processor
 @click.pass_context
 def cli(ctx, sink, opt_net, opt_disk):
-  """Places365 classifier"""
+  """Generates classification metadata (OpenCV DNN)"""
 
   # -------------------------------------------------------------
   # imports

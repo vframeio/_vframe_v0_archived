@@ -37,7 +37,7 @@ from cli_vframe import processor
 @processor
 @click.pass_context
 def cli(ctx, sink, fp_in, opt_format, opt_disk, opt_metadata_types):
-  """Add metadata to chair"""
+  """Appends metadata to media record"""
   
   # -------------------------------------------------
   # imports 

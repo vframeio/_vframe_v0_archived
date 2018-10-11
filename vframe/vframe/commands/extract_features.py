@@ -28,7 +28,7 @@ from cli_vframe import processor
 @processor
 @click.pass_context
 def cli(ctx, sink, opt_disk, opt_net, opt_gpu, opt_normalize):
-  """Generates CNN features using PyTorch"""
+  """Generates CNN features metadata (PyTorch)"""
 
   # -------------------------------------------------
   # imports

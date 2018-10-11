@@ -39,7 +39,7 @@ def cli(ctx, sink):
   
   while True:
     chair_item = yield
-    chair_item.media_record.purge_metadata()
+    #chair_item.media_record.purge_metadata()
     chair_item.remove_keyframes()
     chair_item.remove_drawframes()
     sink.send(chair_item)
