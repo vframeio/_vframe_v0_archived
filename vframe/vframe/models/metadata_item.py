@@ -40,6 +40,17 @@ class DetectResult:
     return {'idx': self.idx, 'score': self.score, 'rect': self.rect}
 
 
+class SceneTextDetectResult:
+  """Stores result from image detection processes"""
+  def __init__(self, text, score, rect):
+    self.rect = list(map(float, rect))  # normalized (x1, y1, x2, y2)
+    self.text = text
+    self.score = float(score)
+
+  def serialize(self):
+    return {'text': self.text, 'score': self.score, 'rect': self.rect}
+
+
 # ---------------------------------------------------------------------------
 # Base class for MetadataItems
 # ---------------------------------------------------------------------------
@@ -368,7 +379,7 @@ class ClassifyMetadataItem(MetadataItem):
 class DetectMetadataItem(MetadataItem):
 
   def __init__(self, metadata):
-    """Represents classification results from Places365 DNN
+    """Represents object detection results
     :param metadata: (list) of (DetectResult)"""
     super().__init__(metadata)
 
@@ -390,3 +401,11 @@ class DetectMetadataItem(MetadataItem):
     for k, v in self._metadata.items():
       metadata[k] = [x.serialize() for x in v]
     return metadata
+
+
+class SceneTextDetectMetadataItem(DetectMetadataItem):
+
+  def __init__(self, metadata):
+    """Represents classification results from Places365 DNN
+    :param metadata: (list) of (SceneTextDetectResult)"""
+    super().__init__(metadata)    

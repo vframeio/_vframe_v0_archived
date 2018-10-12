@@ -42,6 +42,10 @@ class BBox:
     self._cy_norm = self._cy / imh
     self._width_norm = self._width / imw
     self._height_norm = self._height / imh
+    self._x1_norm = self._x1 / imw
+    self._y1_norm = self._y1 / imh
+    self._x2_norm = self._x2 / imw
+    self._y2_norm = self._y2 / imh
 
 
   @property
@@ -118,7 +122,7 @@ class BBox:
     """Converts BBox to normalized center x, center y, w, h"""
     return (self._cx_norm, self._cy_norm, self._width_norm, self._height_norm)
 
-  def as_normalized(self):
+  def as_norm(self):
     """Returns normalized x1, y1, x2, y2"""
     return (self._x1_norm, self._y1_norm, self._x2_norm, self._y2_norm)
 
@@ -127,14 +131,14 @@ class BBox:
   # Create from
 
   @classmethod
-  def from_haar(cls, rect):
+  def from_xywh(cls, rect, imw, imh):
     """OpenCV returns x1, y1, w, h"""
-    return cls(rect[0], rect[1], rect[0] + rect[2], rect[3] + rect[1])
+    return cls(rect[0], rect[1], rect[0] + rect[2], rect[3] + rect[1], imw, imh)
 
   @classmethod
-  def from_css(cls, rect):
+  def from_css(cls, rect, imw, imh):
     """Converts rect from CSS (top, right, bottom, left)""" 
-    return cls(rect[3], rect[0], rect[1], rect[2])
+    return cls(rect[3], rect[0], rect[1], rect[2], imw, imh)
 
   @classmethod
   def from_dlib_rect(cls, box):

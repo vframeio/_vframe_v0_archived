@@ -136,11 +136,15 @@ def cli(ctx, sink, fp_out, opt_format, opt_disk, opt_metadata_type,
         log.debug('fp_out: {}'.format(fp_out))
         file_utils.write_serialized_items(mapping_items, fp_out, 
           ensure_path=True, minify=opt_minify)
-        # clear        
-        mapping_items = []
+        
+        # TODO improve this
+        #
+        # purge metadata,        
         for chair_item in chair_items:
           chair_item.purge_metadata()
+        
         chair_items = []
+        mapping_items = []
         ckpt_iter_num += 1
         # collect/empty garbage
         gc.collect()

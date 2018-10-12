@@ -28,24 +28,49 @@ def draw_rectangle_pil(draw_ctx, bbox, color=(0,255,0), width=1):
     rect_end = (bbox.x2 + i, bbox.y2 + i)
     draw_ctx.rectangle((rect_start, rect_end), outline = color)
 
+def draw_scenetext_result(frame, detection_result, imw, imh, 
+  stroke_weight=2, rect_color=(0,255,0),text_color=(0,0,0)):
+  
+  bbox = BBox.from_norm_coords(detection_result.rect, imw, imh)
+  text = detection_result.text
+  score = detection_result.score
+
+  # draw border
+  pt1, pt2 = bbox.pt1, bbox.pt2
+  cv.rectangle(frame, pt1.tuple() , pt2.tuple(), rect_color, thickness=stroke_weight)
+
+  # prepare label
+  label = '{} ({:.2f})'.format(text, float(score))
+  log.debug('label: {}, bbox: {}'.format(label, str(bbox.as_box())))
+  tw, th = cv.getTextSize(label, cv.FONT_HERSHEY_SIMPLEX, tx_scale, tx_weight)[0]
+
+  # draw label bg
+  rect_pt2 = (pt1.x + tw + tx2_offset, pt1.y - th - ty2_offset)
+  cv.rectangle(frame, pt1.tuple(), rect_pt2, rect_color, -1)
+  # draw label
+  cv.putText(frame, label, pt1.offset(tx_offset, -ty_offset), font, tx_scale, tx_clr, tx_weight)
+  return frame
+
+
 def draw_detection_result(frame, classes, detection_result, imw, imh, 
-	stroke_weight=2, rect_color=(0,255,0),text_color=(0,0,0)):
-	bbox = BBox.from_norm_coords(detection_result.rect, imw, imh)
-	class_idx = detection_result.idx
-	score = detection_result.score
+  stroke_weight=2, rect_color=(0,255,0),text_color=(0,0,0)):
+  
+  bbox = BBox.from_norm_coords(detection_result.rect, imw, imh)
+  class_idx = detection_result.idx
+  score = detection_result.score
 
-	# draw border
-	pt1, pt2 = bbox.pt1, bbox.pt2
-	cv.rectangle(frame, pt1.tuple() , pt2.tuple(), rect_color, thickness=stroke_weight)
+  # draw border
+  pt1, pt2 = bbox.pt1, bbox.pt2
+  cv.rectangle(frame, pt1.tuple() , pt2.tuple(), rect_color, thickness=stroke_weight)
 
-	# prepare label
-	label = '{} ({:.2f})'.format(classes[class_idx].upper(), float(score))
-	log.debug('label: {}, bbox: {}'.format(label, str(bbox.as_box())))
-	tw, th = cv.getTextSize(label, cv.FONT_HERSHEY_SIMPLEX, tx_scale, tx_weight)[0]
+  # prepare label
+  label = '{} ({:.2f})'.format(classes[class_idx].upper(), float(score))
+  log.debug('label: {}, bbox: {}'.format(label, str(bbox.as_box())))
+  tw, th = cv.getTextSize(label, cv.FONT_HERSHEY_SIMPLEX, tx_scale, tx_weight)[0]
 
-	# draw label bg
-	rect_pt2 = (pt1.x + tw + tx2_offset, pt1.y + th + ty2_offset)
-	cv.rectangle(frame, pt1.tuple(), rect_pt2, rect_color, -1)
-	# draw label
-	cv.putText(frame, label, pt1.offset(tx_offset, 3*ty_offset), font, tx_scale, tx_clr, tx_weight)
-	return frame
+  # draw label bg
+  rect_pt2 = (pt1.x + tw + tx2_offset, pt1.y + th + ty2_offset)
+  cv.rectangle(frame, pt1.tuple(), rect_pt2, rect_color, -1)
+  # draw label
+  cv.putText(frame, label, pt1.offset(tx_offset, 3*ty_offset), font, tx_scale, tx_clr, tx_weight)
+  return frame

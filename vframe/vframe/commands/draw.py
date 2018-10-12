@@ -15,14 +15,10 @@ from cli_vframe import processor
 # Displays images, no video yet
 # --------------------------------------------------------
 @click.command()
-@click.option('-a', '--action', 'opt_action', required=True,
-  type=cfg.ActionVar,
-  default=click_utils.get_default(types.Action.ADD),
-  help=click_utils.show_help(types.Action))
-@click.option('-t', '--net-type', 'opt_net',
-  type=cfg.DetectorNetVar,
-  default=click_utils.get_default(types.DetectorNet.COCO),
-  help=click_utils.show_help(types.DetectorNet))
+@click.option('-t', '--metadata-type', 'opt_metadata',
+  type=cfg.MetadataVar,
+  default=click_utils.get_default(types.Metadata.COCO),
+  help=click_utils.show_help(types.Metadata))
 @click.option('-d', '--disk', 'opt_disk',
   default=click_utils.get_default(types.DataStore.HDD),
   type=cfg.DataStoreVar,
@@ -38,7 +34,7 @@ from cli_vframe import processor
   help='Text color')
 @processor
 @click.pass_context
-def cli(ctx, sink, opt_action, opt_net, opt_disk, opt_stroke_weight, opt_stroke_color, opt_text_color):
+def cli(ctx, sink, opt_metadata, opt_disk, opt_stroke_weight, opt_stroke_color, opt_text_color):
   """Displays images"""
   
   # -------------------------------------------------
@@ -58,26 +54,27 @@ def cli(ctx, sink, opt_action, opt_net, opt_disk, opt_stroke_weight, opt_stroke_
 
   log = logger_utils.Logger.getLogger()
   
-
-  fp_classes = Paths.darknet_classes(data_store=opt_disk, opt_net=opt_net)
-  classes = file_utils.load_text(fp_classes)  # returns list in idx order
+  # load class labels
+  if opt_metadata == types.Metadata.COCO:
+    opt_net = types.DetectorNet.COCO
+    fp_classes = Paths.darknet_classes(data_store=opt_disk, opt_net=opt_net)
+    classes = file_utils.load_text(fp_classes)  # returns list in idx order
+  if opt_metadata == types.Metadata.OPENIMAGES:
+    opt_net = types.DetectorNet.OPENIMAGES
+    fp_classes = Paths.darknet_classes(data_store=opt_disk, opt_net=opt_net)
+    classes = file_utils.load_text(fp_classes)  # returns list in idx order
+  elif opt_metadata == types.Metadata.SUBMUNITION:
+    opt_net = types.DetectorNet.SUBMUNITION
+    fp_classes = Paths.darknet_classes(data_store=opt_disk, opt_net=opt_net)
+    classes = file_utils.load_text(fp_classes)  # returns list in idx order
+  elif opt_metadata == types.Metadata.PLACES365:
+    opt_net = types.ClassifyNet.PLACES365
+    pass
+  elif opt_metadata == types.Metadata.TEXTROI:
+    pass
   
   # TODO externalize function
-  # convert net type into metadata type
-  if opt_net == types.DetectorNet.COCO:
-    opt_metadata = types.Metadata.COCO
-  elif opt_net == types.DetectorNet.COCO_SPP:
-    opt_metadata = types.Metadata.COCO  
-  elif opt_net == types.DetectorNet.VOC:
-    opt_metadata = types.Metadata.VOC  
-  elif opt_net == types.DetectorNet.OPENIMAGES:
-    opt_metadata = types.Metadata.OPENIMAGES  
-  elif opt_net == types.DetectorNet.SUBMUNITION:
-    opt_metadata = types.Metadata.SUBMUNITION
-  else:
-    log.error('{} not a valid type'.format(opt_net))
-    return
-
+  
   # -------------------------------------------------
   # process 
   
@@ -85,46 +82,44 @@ def cli(ctx, sink, opt_action, opt_net, opt_disk, opt_stroke_weight, opt_stroke_
     
     chair_item = yield
 
-    drawframes = {}
+    drawframes = {}  # new drawframes
 
-    # ensure frames and metadata exist
-    # if not chair_item.get_metadata(opt_metadata):
+    # ---------------------------------------------------------------
+    # draw on images, assume detection results (not classify)
 
-    if opt_action == types.Action.ADD:
+    detection_metadata = chair_item.get_metadata(opt_metadata)
+    log.debug('frames: {}'.format(detection_metadata))
 
-      # ---------------------------------------------------------------
-      # draw on images, assume detection results (not classify)
+    for frame_idx in chair_item.drawframes.keys():
 
-      detection_metadata = chair_item.get_metadata(opt_metadata)
-      log.debug('frames: {}'.format(detection_metadata))
+      drawframe = chair_item.drawframes.get(frame_idx)
+      imh, imw = drawframe.shape[:2]
 
-      for frame_idx in chair_item.drawframes.keys():
+      detection_results = detection_metadata.metadata.get(frame_idx)
 
-        drawframe = chair_item.drawframes.get(frame_idx)
-        imh, imw = drawframe.shape[:2]
-
-        detection_results = detection_metadata.metadata.get(frame_idx)
-
-        log.debug('detection_results: {}'.format(detection_results))
-        
-        for detection_result in detection_results:
-
-          frame = draw_utils.draw_detection_result(drawframe, classes, detection_result, imw, imh, 
-            stroke_weight=opt_stroke_weight, rect_color=opt_stroke_color, text_color=opt_text_color)
-          
-        # add to current items drawframes dict
-        drawframes[frame_idx] = drawframe
-
-      # after drawing all, append imges to chair_item
-      # reset drawframes ?
-      chair_item.set_drawframes(drawframes)
-
-    elif opt_action == types.Action.RM:
+      log.debug('detection_results: {}'.format(detection_results))
       
-      # ---------------------------------------------------------------
-      # remvoe image data to free RAM
+      for detection_result in detection_results:
 
-      chair_item.remove_drawframes()
+        if opt_metadata == types.Metadata.COCO \
+          or opt_metadata == types.Metadata.SUBMUNITION \
+          or opt_metadata == types.Metadata.VOC \
+          or opt_metadata == types.Metadata.OPENIMAGES:
+          # draw object detection boxes and labels
+          frame = draw_utils.draw_detection_result(drawframe, classes, detection_result, 
+            imw, imh, stroke_weight=opt_stroke_weight, 
+            rect_color=opt_stroke_color, text_color=opt_text_color)
+
+        elif opt_metadata == types.Metadata.TEXTROI:
+          frame = draw_utils.draw_scenetext_result(drawframe, detection_result, 
+            imw, imh, stroke_weight=opt_stroke_weight, 
+            rect_color=opt_stroke_color, text_color=opt_text_color)
+        
+      # add to current items drawframes dict
+      drawframes[frame_idx] = drawframe
+
+    chair_item.set_drawframes(drawframes)
+
 
     # ------------------------------------------------
     # rebuild the generator

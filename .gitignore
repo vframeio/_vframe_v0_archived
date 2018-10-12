@@ -1,7 +1,8 @@
 # Custom
 *_local_*
 env/
-
+3rdparty/
+'
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

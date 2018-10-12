@@ -125,7 +125,7 @@ def cli(ctx, sink, opt_disk, opt_net, opt_gpu):
       metadata[frame_idx] = det_results
 
     # append metadata to chair_item's mapping item
-    chair_item.item.set_metadata(metadata_type, DetectMetadataItem(metadata))
+    chair_item.set_metadata(metadata_type, DetectMetadataItem(metadata))
   
     # ----------------------------------------------------------------
     # yield back to the processor pipeline
