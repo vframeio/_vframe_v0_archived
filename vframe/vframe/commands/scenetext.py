@@ -151,7 +151,7 @@ def cli(ctx, sink, opt_disk, opt_net):
           scores = np.array(confidences)[indicies]
           for rect, score in zip(rects, scores):
             rect_norm = BBox.from_xywh(rect, dnn_size[0], dnn_size[1]).as_norm()
-            det_results.append( SceneTextDetectResult('EAST', score, rect_norm) )
+            det_results.append( SceneTextDetectResult(score, rect_norm) )
 
         metadata[frame_idx] = det_results
 

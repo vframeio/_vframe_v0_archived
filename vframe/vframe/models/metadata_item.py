@@ -42,13 +42,12 @@ class DetectResult:
 
 class SceneTextDetectResult:
   """Stores result from image detection processes"""
-  def __init__(self, text, score, rect):
+  def __init__(self, score, rect):
     self.rect = list(map(float, rect))  # normalized (x1, y1, x2, y2)
-    self.text = text
     self.score = float(score)
 
   def serialize(self):
-    return {'text': self.text, 'score': self.score, 'rect': self.rect}
+    return {'score': self.score, 'rect': self.rect}
 
 
 # ---------------------------------------------------------------------------
