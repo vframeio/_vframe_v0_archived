@@ -56,6 +56,11 @@ DIR_MODELS_PYTORCH = join(DIR_MODELS_VFRAME,'pytorch')
 DIR_MODELS_TORCH = join(DIR_MODELS_VFRAME,'torch')
 DIR_MODELS_MXNET = join(DIR_MODELS_VFRAME,'mxnet')
 DIR_MODELS_TF = join(DIR_MODELS_VFRAME,'tensorflow')
+DIR_MODELS_DLIB = join(DIR_MODELS_VFRAME,'dlib')
+DIR_MODELS_DLIB_CNN = join(DIR_MODELS_DLIB, 'mmod_human_face_detector.dat')
+DIR_MODELS_DLIB_5PT = join(DIR_MODELS_DLIB, 'shape_predictor_5_face_landmarks.dat')
+DIR_MODELS_DLIB_68PT = join(DIR_MODELS_DLIB, 'shape_predictor_68_face_landmarks.dat')
+
 
 # Test images
 DIR_TEST_IMAGES = join(DIR_APP_SA, 'test', 'images')
