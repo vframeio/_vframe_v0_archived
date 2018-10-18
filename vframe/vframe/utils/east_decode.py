@@ -1,24 +1,7 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-"""
-This code is from Tom Hoag
-https://bitbucket.org/tomhoag/opencv-text-detection/overview
-and used with MIT License
-
-it is based on code from
-https://www.pyimagesearch.com/2018/08/20/opencv-text-detection-east-text-detector/
-"""
-
-
-
-
 import numpy as np
 import cv2
 
-
-# ------------------------------------------------------------------------------------------------
-
+#
 # rects are rectangles encoded as [x, y, w, h] and used predominately by openCV
 # boxes are rectangles encoded as [ulx, uly, lrx, lry]
 #
@@ -29,7 +12,7 @@ import cv2
 #   confidences -- an array of floats correstponding to each rectangle in rects
 #   baggage -- an array of dictionaries that contain info about each rect including its offset and angle
 #
-def east_text_decode(scores, geometry, confidenceThreshold):
+def decode(scores, geometry, confidenceThreshold):
     
     # grab the number of rows and columns from the scores volume, then
     # initialize our set of bounding box rectangles and corresponding confidence scores
@@ -188,7 +171,6 @@ def pisDecode(scores, geometry, confidenceThreshold):
         
             # if our score does not have sufficient probability, ignore it
             if scoresData[x] < confidenceThreshold:
-                print(scoresData[x])
                 continue
     
             confidences.append(float(scoresData[x]))

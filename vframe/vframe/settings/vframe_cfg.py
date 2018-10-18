@@ -18,6 +18,7 @@ ClassifyNetVar = click_utils.ParamVar(types.ClassifyNet)
 DetectorNetVar = click_utils.ParamVar(types.DetectorNet)
 PyTorchNetVar = click_utils.ParamVar(types.PyTorchNet)
 SceneTextNetVar = click_utils.ParamVar(types.SceneTextNet)
+FaceDetectNetVar = click_utils.ParamVar(types.FaceDetectNet)
 
 SearchParamVar = click_utils.ParamVar(types.SearchParam)
 ClientRecordVar = click_utils.ParamVar(types.ClientRecord)

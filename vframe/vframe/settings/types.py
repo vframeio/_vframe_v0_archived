@@ -32,7 +32,7 @@ class Metadata(Enum):
 
   MEDIA_RECORD, SUGARCUBE, MEDIAINFO, EXIF, KEYFRAME, KEYFRAME_STATUS, \
   FEATURE_VGG16, FEATURE_RESNET18, FEATURE_ALEXNET, VOC, COCO, \
-  PLACES365, OPENIMAGES, SUBMUNITION, TEXTROI = range(15)
+  PLACES365, OPENIMAGES, SUBMUNITION, TEXT_ROI, FACE_ROI = range(16)
 
 
 class MetadataTree(Enum):
@@ -70,6 +70,10 @@ class DetectorNet(Enum):
 class SceneTextNet(Enum):
   """Scene text detector networks"""
   EAST, DEEPSCENE = range(2)
+
+class FaceDetectNet(Enum):
+  """Scene text detector networks"""
+  HAAR, DLIB_CNN, DLIB_HOG, CVDNN = range(4)
 
 class PyTorchNet(Enum):
   """Types of PyTorch weights for feature extractor"""

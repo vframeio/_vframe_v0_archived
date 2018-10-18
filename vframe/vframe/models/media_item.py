@@ -91,8 +91,10 @@ class MediaRecordItem:
         mapped[types.Metadata.COCO] = DetectMetadataItem.from_dict(v)
       elif k == types.Metadata.SUBMUNITION.name.lower():
         mapped[types.Metadata.SUBMUNITION] = DetectMetadataItem.from_dict(v)
-      elif k == types.Metadata.SUBMUNITION.name.lower():
-        mapped[types.Metadata.SUBMUNITION] = DetectMetadataItem.from_dict(v)
+      elif k == types.Metadata.FACE_ROI.name.lower():
+        mapped[types.Metadata.FACE_ROI] = ROIMetadataItem.from_dict(v)
+      elif k == types.Metadata.TEXT_ROI.name.lower():
+        mapped[types.Metadata.TEXT_ROI] = ROIMetadataItem.from_dict(v)
       else:
         msg = '{} is a not valid metadata type or not yet impelemented'.format(k) 
         cls.log.error(msg)

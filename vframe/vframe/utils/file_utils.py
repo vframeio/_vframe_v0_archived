@@ -142,26 +142,6 @@ def load_pickle(fp_in):
     data = pickle.load(fp)
   return data
 
-def xload_metadata(fp_in, metadata_key, metadata_value):
-
-  mapped = {}
-  for k, v in metadata.items():
-    if k == types.Metadata.MEDIAINFO.name.lower():
-      mapped[types.Metadata.MEDIAINFO] = MediainfoMetadataItem.from_dict(v)
-    elif k == types.Metadata.KEYFRAME.name.lower():
-      mapped[types.Metadata.KEYFRAME] = KeyframeMetadataItem.from_dict(v) 
-    elif k == types.Metadata.KEYFRAME_STATUS.name.lower():
-      mapped[types.Metadata.KEYFRAME_STATUS] = KeyframeStatusMetadataItem.from_dict(v) 
-    elif k == types.Metadata.FEATURE_VGG16.name.lower():
-      mapped[types.Metadata.FEATURE_VGG16] = FeatureMetadataItem.from_dict(v) 
-    elif k == types.Metadata.PLACES365.name.lower():
-      mapped[types.Metadata.PLACES365] = ClassifyMetadataItem.from_dict(v) 
-    elif k == types.Metadata.COCO.name.lower():
-      mapped[types.Metadata.COCO] = DetectMetadataItem.from_dict(v) 
-    else:
-      raise ValueError('{} is a not valid metadata type'.format(k))
-  return mapped
-
 
 def load_records(fp_in, slice_idxs=None, media_record_type=types.MediaRecord.SHA256, verbose=False):
   """Loads JSON or Pickle mapping data based on file extension

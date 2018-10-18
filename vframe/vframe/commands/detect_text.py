@@ -9,6 +9,8 @@ Minghui Liao et al.: TextBoxes: A Fast Text Detector with a Single Deep Neural N
 https://arxiv.org/abs/1611.06779
 
 EAST Text Detector
+https://bitbucket.org/tomhoag/opencv-text-detection/overview
+https://github.com/argman/EAST
 
 """
 
@@ -26,13 +28,19 @@ from cli_vframe import processor
   type=cfg.DataStoreVar,
   show_default=True,
   help=click_utils.show_help(types.DataStore))
+@click.option('--conf', 'opt_conf_thresh', 
+  type=click.FloatRange(0,1), default=0.95,
+  help='Minimum detection confidence')
+@click.option('--nms', 'opt_nms_thresh',
+  type=click.FloatRange(0,1), default=0.4,
+  help='Minimum non-max supression confidence')
 @click.option('-t', '--net-type', 'opt_net',
   type=cfg.SceneTextNetVar,
-  default=click_utils.get_default(types.SceneTextNet.DEEPSCENE),
+  default=click_utils.get_default(types.SceneTextNet.EAST),
   help=click_utils.show_help(types.SceneTextNet))
 @processor
 @click.pass_context
-def cli(ctx, sink, opt_disk, opt_net):
+def cli(ctx, sink, opt_disk, opt_net, opt_conf_thresh, opt_nms_thresh):
   """Generates scene text ROIs (CV DNN)"""
 
   # ----------------------------------------------------------------
@@ -49,7 +57,7 @@ def cli(ctx, sink, opt_disk, opt_net):
 
   from vframe.utils import click_utils, file_utils, im_utils, logger_utils, dnn_utils
   from vframe.utils import scenetext_utils
-  from vframe.models.metadata_item import SceneTextDetectMetadataItem, SceneTextDetectResult
+  from vframe.models.metadata_item import ROIMetadataItem, ROIDetectResult
   from vframe.settings.paths import Paths
   from vframe.models.bbox import BBox
 
@@ -59,34 +67,23 @@ def cli(ctx, sink, opt_disk, opt_net):
   log = logger_utils.Logger.getLogger()
 
 
-  # TODO externalize function
-
+  metadata_type = types.Metadata.TEXT_ROI
+  
   # initialize dnn
-  dnn_clr = (0, 0, 0)  # mean color to subtract
-  dnn_scale = 1/255  # ?
-  nms_threshold = 0.4   #Non-maximum suppression threshold
-  dnn_px_range = 1  # pixel value range ?
-  dnn_crop = False  # probably crop or force resize
-
-  # Use mulitples of 32: 416, 448, 480, 512, 544, 576, 608, 640, 672, 704
   if opt_net == types.SceneTextNet.EAST:
-    metadata_type = types.Metadata.TEXTROI
-    dnn_size = (320, 320)
-    dnn_mean_clr = (123.68, 116.78, 103.94)
-    dnn_scale = 1.0
-    nms_thresh = 0.4
-    conf_thresh = 0.5
+    # TODO externalize
+    dnn_size = (320, 320)  # fixed
+    dnn_mean_clr = (123.68, 116.78, 103.94)  # fixed
+    dnn_scale = 1.0  # fixed
     dnn_layer_names = ["feature_fusion/Conv_7/Sigmoid", "feature_fusion/concat_3"]
     fp_model = join(cfg.DIR_MODELS_TF, 'east', 'frozen_east_text_detection.pb')
     log.debug('fp_model: {}'.format(fp_model))
     net = cv.dnn.readNet(fp_model)
-    # net.setPreferableBackend(cv.dnn.DNN_BACKEND_OPENCV)
-    # net.setPreferableTarget(cv.dnn.DNN_TARGET_CPU)
+    #net.setPreferableBackend(cv.dnn.DNN_BACKEND_OPENCV)
+    #net.setPreferableTarget(cv.dnn.DNN_TARGET_CPU)
 
   elif  opt_net == types.SceneTextNet.DEEPSCENE:
-    metadata_type = types.Metadata.TEXTROI
-    dnn_size = (320, 320)
-    conf_thresh = 0.5
+    dnn_size = (320, 320)  # fixed
     fp_model = join(cfg.DIR_MODELS_CAFFE, 'deepscenetext', "TextBoxes_icdar13.caffemodel")
     fp_prototxt = join(cfg.DIR_MODELS_CAFFE, 'deepscenetext', 'textbox.prototxt')
     net = cv.text.TextDetectorCNN_create(fp_prototxt, fp_model)
@@ -104,34 +101,33 @@ def cli(ctx, sink, opt_disk, opt_net):
     
     for frame_idx, frame in chair_item.keyframes.items():
 
-      # detect
-      imh, imw = frame.shape[:2]
-
       if opt_net == types.SceneTextNet.DEEPSCENE:
-        
-        frame = im_utils.resize(frame, width=160)
+        # DeepScene scene text detector (opencv contrib)
+        frame = im_utils.resize(frame, width=dnn_size[0], height=dnn_size[1])
+        frame_dim = frame.shape[:2][::-1]
         rects, probs = net.detect(frame)
         det_results = []
         for r in range(np.shape(rects)[0]):
           prob = float(probs[r])
-          if prob > conf_thresh:
-            log.debug('thresh ok: {}'.format(prob))
-            x1, y1, w, h = rects[r]
-            log.debug('make bbox')
-            rect_norm = BBox(x1, y1, x1 + w, y1 + h, imw, imh).as_norm()
-            log.debug('append scene text')
-            det_results.append( SceneTextDetectResult('hello', prob, rect_norm) )
-            log.debug('found text: {}'.format(rect_norm))
+          if prob > opt_conf_thresh:
+            rect = BBox.from_xywh_dim(*rects[r], frame_dim).as_xyxy()  # normalized
+            det_results.append( ROIDetectResult(prob, rect))
               
         metadata[frame_idx] = det_results
 
       elif types.SceneTextNet.EAST:
-
+        # EAST scene text detector
         frame = im_utils.resize(frame, width=dnn_size[0], height=dnn_size[1])
+        # frame = im_utils.resize(frame, width=dnn_size[0], he)
+        frame_dim = frame.shape[:2][::-1]
+        frame_dim = dnn_size
+
+        # blob = cv.dnn.blobFromImage(frame, dnn_scale, dnn_size, dnn_mean_clr, swapRB=True, crop=False)
         blob = cv.dnn.blobFromImage(frame, dnn_scale, dnn_size, dnn_mean_clr, swapRB=True, crop=False)
         net.setInput(blob)
         (scores, geometry) = net.forward(dnn_layer_names)
-        (rects, confidences, baggage) = scenetext_utils.east_text_decode(scores, geometry, conf_thresh)
+        (rects, confidences, baggage) = scenetext_utils.east_text_decode(scores, geometry, opt_conf_thresh)
+        
         det_results = []
         if rects:
           offsets = []
@@ -143,21 +139,21 @@ def cli(ctx, sink, opt_disk, opt_net):
           # functions = [nms.felzenszwalb.nms, nms.fast.nms, nms.malisiewicz.nms]
           indicies = nms.boxes(rects, confidences, 
             nms_function=nms.fast.nms, 
-            confidence_threshold=conf_thresh,
-            nsm_threshold=nms_thresh)
+            confidence_threshold=opt_conf_thresh,
+            nsm_threshold=opt_nms_thresh)
         
           indicies = np.array(indicies).reshape(-1)
           rects = np.array(rects)[indicies]
           scores = np.array(confidences)[indicies]
           for rect, score in zip(rects, scores):
-            rect_norm = BBox.from_xywh(rect, dnn_size[0], dnn_size[1]).as_norm()
-            det_results.append( SceneTextDetectResult(score, rect_norm) )
+            rect = BBox.from_xywh_dim(*rect, frame_dim).as_xyxy()  # normalized
+            det_results.append( ROIDetectResult(score, rect) )
 
         metadata[frame_idx] = det_results
 
         
     # append metadata to chair_item's mapping item
-    chair_item.set_metadata(metadata_type, SceneTextDetectMetadataItem(metadata))
+    chair_item.set_metadata(metadata_type, ROIMetadataItem(metadata))
   
     # ----------------------------------------------------------------
     # yield back to the processor pipeline

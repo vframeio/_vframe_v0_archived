@@ -1,5 +1,6 @@
 """Object that passes through the chair/click pipeline"""
 
+from os.path import join
 from threading import Thread
 
 import cv2 as cv
@@ -8,7 +9,7 @@ from imutils.video import FileVideoStream
 from vframe.settings import types
 from vframe.settings import vframe_cfg as cfg
 from vframe.models.media_item import MediaRecordItem
-from vframe.utils import logger_utils
+from vframe.utils import logger_utils, file_utils, im_utils
 
 import numpy as np
 
@@ -31,18 +32,21 @@ class ChairItem(object):
     self._drawframes = {}
     self._media_record = None
 
-  def set_keyframes(self, keyframes, add_drawframe=False):
+  def set_keyframes(self, frames, add_drawframe=False):
     """Adds dict of keyframe images"""
-    self._keyframes = keyframes
+    self._keyframes = frames
     if add_drawframe:
-      self._drawframes = keyframes.copy()
+      # deep copy frames
+      self._drawframes = {}
+      for frame_idx, frame in frames.items():
+        self._drawframes[frame_idx] = frame.copy()
 
   def remove_keyframes(self):
     self._keyframes = {}
 
-  def set_drawframes(self, keyframes):
+  def set_drawframes(self, frames):
     """Adds dict of keyframe images"""
-    self._keyframes = keyframes
+    self._drawframes = frames
 
   def remove_drawframes(self):
     self._drawframes = {}
@@ -86,6 +90,10 @@ class ChairItem(object):
     """alternate name for same data"""
     return self._media_record.media_format
   
+  def load_images(self):
+    # overwrite
+    pass
+
 
 class VideoKeyframeChairItem(ChairItem):
 
@@ -95,9 +103,8 @@ class VideoKeyframeChairItem(ChairItem):
     super().__init__(ctx)
     self._frame = frame
     self._frame_idx = frame_idx
-    self._drawframe = frame.copy()
-    self._keyframes = {frame_idx: self._frame}
-    self._drawframes = {frame_idx: self._drawframe}
+    self._frame = frame
+    #self._keyframes = {frame_idx: self._frame}
     mr = MediaRecordItem(0, types.MediaFormat.VIDEO, 0, metadata={})
     self._media_record = mr
 
@@ -111,6 +118,12 @@ class VideoKeyframeChairItem(ChairItem):
   def remove_drawframe(self):
     self._drawframe = None
 
+  def load_images(self, opt_size_type, opt_drawframes=False):
+    """This is broken because images are already loaded"""
+    # eventually move this into VideoChairItem
+    # temporary fix for testing:
+    self.set_keyframes({0: self._frame}, opt_drawframes)    
+
   @property
   def frame(self):
     return self._frame
@@ -121,20 +134,28 @@ class VideoKeyframeChairItem(ChairItem):
   
 
 
+
 class PhotoChairItem(ChairItem):
 
   chair_type = types.ChairItemType.PHOTO
 
-  def __init__(self, ctx, frame):
-
+  def __init__(self, ctx, fp_image):
+    super().__init__(ctx)
     self._ctx = ctx
-    self._frame = frame
-    self._drawframe = frame.copy()
-    mr = MediaRecordItem(0, types.MediaFormat.VIDEO, 0, metadata={})
+    self._fp_image = fp_image
+    mr = MediaRecordItem(0, types.MediaFormat.PHOTO, 0, metadata={})
     self._media_record = mr
 
+  def load_images(self, fp_image, opt_size_type, opt_drawframes=False):
+    # append metadata to chair_item's mapping item
+    opt_size = cfg.IMAGE_SIZES[opt_size_type]
+    im = im_utils.resize(cv.imread(self._fp_image), width=opt_size)
+    self.set_keyframes({0: im}, opt_drawframes)
 
-class VideoChairItem(ChairItem):
+
+class _x_VideoChairItem(ChairItem):
+
+  # CURRENTLY NOT IN USE
 
   chair_type = types.ChairItemType.VIDEO
 
@@ -152,14 +173,13 @@ class VideoChairItem(ChairItem):
     self._media_record = mr
 
 
-  def load_video_keyframes(self, opt_drawframes=False):
+  def load_images(self, opt_size_type, opt_drawframes=False):
     """Loads keyframes from video"""
     self.log.debug('init load_video_keyframes')
     self._opt_drawframes = opt_drawframes
-    
+    self._frame_width = cfg.IMAGE_SIZES[opt_size_type]
     self.log.debug('load: {}'.format(self._fp_video))
     # self._filevideostream = FileVideoStream(self._fp_video, transform=None, queueSize=256)
-
     # self._filevideostream.start()
     self.log.debug('filevideostream started')
     self._stream = cv.VideoCapture(self._fp_video)
@@ -201,6 +221,7 @@ class VideoChairItem(ChairItem):
       if not valid:
         self._stream.release()
         break
+      frame = im_utils.resize(frame, width=self._frame_width)
       self._keyframes[frame_idx] = frame
       if self._opt_drawframes:
         self._drawframes[frame_idx] = frame.copy()  # make drawable copy
@@ -253,6 +274,50 @@ class MediaRecordChairItem(ChairItem):
     super().__init__(ctx)
     self._media_record = media_record
     self._sha256 = self._media_record.sha256
+
+  def load_images(self, dir_media, opt_size_label, opt_drawframes=False):
+
+    sha256_tree = file_utils.sha256_tree(self._sha256)
+    dir_sha256 = join(dir_media, sha256_tree, self._sha256)
+    
+    # get the keyframe status data to check if images available
+    try:
+      keyframe_status = self.get_metadata(types.Metadata.KEYFRAME_STATUS)
+    except Exception as ex:
+      log.error('no keyframe metadata. Try: "append -t keyframe_status"')
+      return
+
+    keyframes = {}
+
+    # if keyframe images were generated and exist locally
+    if keyframe_status and keyframe_status.get_status(opt_size):
+      
+      keyframe_metadata = self.get_metadata(types.Metadata.KEYFRAME)
+      
+      if not keyframe_metadata:
+        log.error('no keyframe metadata. Try: "append -t keyframe"')
+        return
+
+      # get keyframe indices
+      frame_idxs = keyframe_metadata.get_keyframes(opt_density)
+
+      for frame_idx in frame_idxs:
+        # get keyframe filepath
+        fp_keyframe = join(dir_sha256, file_utils.zpad(frame_idx), opt_size_label, 'index.jpg')
+        try:
+          im = cv.imread(fp_keyframe)
+          im.shape  # used to invoke error if file didn't load correctly
+        except:
+          log.warn('file not found: {}'.format(fp_keyframe))
+          # don't add to keyframe dict
+          continue
+
+        keyframes[frame_idx] = im
+    
+    
+    # append metadata to chair_item's mapping item
+    self.set_keyframes(keyframes, opt_drawframes)
+
 
   @property
   def sha256(self):

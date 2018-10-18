@@ -141,6 +141,8 @@ def cli(ctx, sink, opt_disk, opt_net, opt_gpu):
       frame_dk = DarknetImage(frame)
       net_outputs = net.detect(frame_dk, thresh=conf_thresh, hier_thresh=hier_thresh, nms=nms_thresh)
       # threshold
+      # convert to dnn util
+      
       net_outputs = [x for x in  net_outputs if float(x[1]) > dnn_threshold]
 
       # append as metadata

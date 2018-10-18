@@ -40,8 +40,8 @@ class DetectResult:
     return {'idx': self.idx, 'score': self.score, 'rect': self.rect}
 
 
-class SceneTextDetectResult:
-  """Stores result from image detection processes"""
+class ROIDetectResult:
+  """Stores result from classless roi detection processes (eg text, face)"""
   def __init__(self, score, rect):
     self.rect = list(map(float, rect))  # normalized (x1, y1, x2, y2)
     self.score = float(score)
@@ -402,9 +402,9 @@ class DetectMetadataItem(MetadataItem):
     return metadata
 
 
-class SceneTextDetectMetadataItem(DetectMetadataItem):
+class ROIMetadataItem(DetectMetadataItem):
 
   def __init__(self, metadata):
-    """Represents classification results from Places365 DNN
-    :param metadata: (list) of (SceneTextDetectResult)"""
+    """Represents classless object regions of interest (ROI) (eg face, text)
+    :param metadata: (list) of (ROIDetectResult)"""
     super().__init__(metadata)    

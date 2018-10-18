@@ -28,11 +28,11 @@ def draw_rectangle_pil(draw_ctx, bbox, color=(0,255,0), width=1):
     rect_end = (bbox.x2 + i, bbox.y2 + i)
     draw_ctx.rectangle((rect_start, rect_end), outline = color)
 
-def draw_scenetext_result(frame, detection_result, imw, imh, 
+def draw_roi(frame, detection_result, imw, imh, text=None,
   stroke_weight=2, rect_color=(0,255,0),text_color=(0,0,0)):
   
-  bbox = BBox.from_norm_coords(detection_result.rect, imw, imh)
-  text = detection_result.text
+  dim = (imw, imh)
+  bbox = BBox(*detection_result.rect).to_dim(dim)
   score = detection_result.score
 
   # draw border
@@ -40,8 +40,11 @@ def draw_scenetext_result(frame, detection_result, imw, imh,
   cv.rectangle(frame, pt1.tuple() , pt2.tuple(), rect_color, thickness=stroke_weight)
 
   # prepare label
-  label = '{} ({:.2f})'.format(text, float(score))
-  log.debug('label: {}, bbox: {}'.format(label, str(bbox.as_box())))
+  if text:
+    label = '{} ({:.2f})'.format(text, float(score))
+  else:
+    label = '{:.2f}'.format(float(score))
+
   tw, th = cv.getTextSize(label, cv.FONT_HERSHEY_SIMPLEX, tx_scale, tx_weight)[0]
 
   # draw label bg
@@ -55,7 +58,7 @@ def draw_scenetext_result(frame, detection_result, imw, imh,
 def draw_detection_result(frame, classes, detection_result, imw, imh, 
   stroke_weight=2, rect_color=(0,255,0),text_color=(0,0,0)):
   
-  bbox = BBox.from_norm_coords(detection_result.rect, imw, imh)
+  bbox = BBox(detection_result.rect).scale(imw, imh)
   class_idx = detection_result.idx
   score = detection_result.score
 

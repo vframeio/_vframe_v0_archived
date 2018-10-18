@@ -48,7 +48,7 @@ def cli(ctx, sink, opt_delay):
   ctx.opts.setdefault('last_frame_ms', time())
   log.debug('last_frame_ms: {}'.format(ctx.opts['last_frame_ms']))
 
-  video_buffer_adj = -5  # milliseconds to adjust delay
+  video_buffer_adj = -10  # milliseconds to adjust delay
 
   # -------------------------------------------------
   # process 
@@ -65,25 +65,31 @@ def cli(ctx, sink, opt_delay):
         chair_utils.handle_keyboard(ctx, opt_delay)
 
     elif chair_item.chair_type == types.ChairItemType.PHOTO:
-      pass
-    elif chair_item.chair_type == types.ChairItemType.VIDEO_KEYFRAME:
-      frame = chair_item.drawframe
-      cv.imshow('vframe', frame)
-      # handle keyboard, autocalculate threshold frame rate
-      ms_elapsed = time() - ctx.opts['last_display_ms']
-      delta_ms = int(max(ctx.opts['mspf'] - ms_elapsed + video_buffer_adj, 1))
-      chair_utils.handle_keyboard(ctx, delta_ms)  # override delay
-      ctx.opts['last_display_ms'] = time()
+      for frame_idx, frame in chair_item.drawframes.items():
+        cv.imshow('vframe', frame)
+      log.debug('show frame')
+      ctx.opts.setdefault('paused', True)
+      chair_utils.handle_keyboard(ctx, opt_delay)
 
-    elif chair_item.chair_type == types.ChairItemType.VIDEO:
-      log.debug('video has: {} frames'.format(len(chair_item.drawframes.items())))
+    elif chair_item.chair_type == types.ChairItemType.VIDEO_KEYFRAME:
       for frame_idx, frame in chair_item.drawframes.items():
         cv.imshow('vframe', frame)
         # handle keyboard, autocalculate threshold frame rate
-        ms_elapsed = time() - chair_item.last_display_ms
-        delta_ms = int(max(chair_item.mspf - ms_elapsed + video_buffer_adj, 1))
+        ms_elapsed = time() - ctx.opts['last_display_ms']
+        delta_ms = int(max(ctx.opts['mspf'] - ms_elapsed + video_buffer_adj, 1))
         chair_utils.handle_keyboard(ctx, delta_ms)  # override delay
-        chair_item.last_display_ms = time()
+        ctx.opts['last_display_ms'] = time()
+
+    elif chair_item.chair_type == types.ChairItemType.VIDEO:
+      pass
+      # log.debug('video has: {} frames'.format(len(chair_item.drawframes.items())))
+      # for frame_idx, frame in chair_item.drawframes.items():
+      #   cv.imshow('vframe', frame)
+      #   # handle keyboard, autocalculate threshold frame rate
+      #   ms_elapsed = time() - chair_item.last_display_ms
+      #   delta_ms = int(max(chair_item.mspf - ms_elapsed + video_buffer_adj, 1))
+      #   chair_utils.handle_keyboard(ctx, delta_ms)  # override delay
+      #   chair_item.last_display_ms = time()
 
 
     # ------------------------------------------------

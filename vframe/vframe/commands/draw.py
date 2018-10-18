@@ -69,8 +69,10 @@ def cli(ctx, sink, opt_metadata, opt_disk, opt_stroke_weight, opt_stroke_color, 
     classes = file_utils.load_text(fp_classes)  # returns list in idx order
   elif opt_metadata == types.Metadata.PLACES365:
     opt_net = types.ClassifyNet.PLACES365
+    # TODO add class file
+  elif opt_metadata == types.Metadata.TEXT_ROI:
     pass
-  elif opt_metadata == types.Metadata.TEXTROI:
+  elif opt_metadata == types.Metadata.FACE_ROI:
     pass
   
   # TODO externalize function
@@ -88,7 +90,6 @@ def cli(ctx, sink, opt_metadata, opt_disk, opt_stroke_weight, opt_stroke_color, 
     # draw on images, assume detection results (not classify)
 
     detection_metadata = chair_item.get_metadata(opt_metadata)
-    log.debug('frames: {}'.format(detection_metadata))
 
     for frame_idx in chair_item.drawframes.keys():
 
@@ -96,8 +97,6 @@ def cli(ctx, sink, opt_metadata, opt_disk, opt_stroke_weight, opt_stroke_color, 
       imh, imw = drawframe.shape[:2]
 
       detection_results = detection_metadata.metadata.get(frame_idx)
-
-      log.debug('detection_results: {}'.format(detection_results))
       
       for detection_result in detection_results:
 
@@ -110,9 +109,13 @@ def cli(ctx, sink, opt_metadata, opt_disk, opt_stroke_weight, opt_stroke_color, 
             imw, imh, stroke_weight=opt_stroke_weight, 
             rect_color=opt_stroke_color, text_color=opt_text_color)
 
-        elif opt_metadata == types.Metadata.TEXTROI:
-          frame = draw_utils.draw_scenetext_result(drawframe, detection_result, 
-            imw, imh, stroke_weight=opt_stroke_weight, 
+        elif opt_metadata == types.Metadata.TEXT_ROI:
+          frame = draw_utils.draw_roi(drawframe, detection_result, 
+            imw, imh, text='TEXT', stroke_weight=opt_stroke_weight, 
+            rect_color=opt_stroke_color, text_color=opt_text_color)
+        elif opt_metadata == types.Metadata.FACE_ROI:
+          frame = draw_utils.draw_roi(drawframe, detection_result, 
+            imw, imh, text='FACE', stroke_weight=opt_stroke_weight, 
             rect_color=opt_stroke_color, text_color=opt_text_color)
         
       # add to current items drawframes dict
