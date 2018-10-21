@@ -2,7 +2,7 @@
 
 VFRAME is a computer vision toolkit designed for human rights researchers.
 
-![](docs/vframe_screenshot_04.10.2018_02.png)
+![](docs/images/vframe_screenshot_04.10.2018_02.png)
 
 Demo of cluster munition detector (in progress)
 
