@@ -60,7 +60,6 @@ dependencies:
   - libgcc-ng=8.2.0=hdf63c60_1
   - libgfortran-ng=7.3.0=hdf63c60_0
   - libglu=9.0.0=hf484d3e_1
-  - libopencv=3.4.2=hb342d67_1
   - libopus=1.2.1=hb9ed12e_0
   - libpng=1.6.34=hb9fc6fc_0
   - libsodium=1.0.16=h1bed415_0
@@ -87,7 +86,6 @@ dependencies:
   - numpy=1.15.2=py35h1d66e8a_0
   - numpy-base=1.15.2=py35h81de0dd_0
   - olefile=0.46=py35_0
-  - opencv=3.4.2=py35h6fd60c2_1
   - openssl=1.0.2p=h14c3975_0
   - pandoc=2.2.3.2=0
   - pandocfilters=1.4.2=py35_1
@@ -101,7 +99,6 @@ dependencies:
   - prometheus_client=0.3.1=py35h28b3542_0
   - prompt_toolkit=1.0.15=py35hc09de7a_0
   - ptyprocess=0.6.0=py35_0
-  - py-opencv=3.4.2=py35hb342d67_1
   - pyasn1=0.4.4=py35h28b3542_0
   - pyasn1-modules=0.2.2=py35_0
   - pycparser=2.19=py35_0
@@ -145,25 +142,55 @@ dependencies:
   - pytorch=0.4.1=py35_py27__9.0.176_7.1.2_2
   - torchvision=0.2.1=py35_1
   - pip:
+    - absl-py==0.5.0
+    - astor==0.7.1
     - click==7.0
+    - click-spinner==0.1.8
     - cloudpickle==0.6.0
     - colorlog==3.1.4
     - cycler==0.10.0
     - cython==0.28.5
     - dask==0.19.3
+    - dlib==19.16.99
+    - dominate==2.3.4
+    - easydict==1.8
+    - flask==1.0.2
+    - gast==0.2.0
+    - grpcio==1.15.0
+    - h5py==2.8.0
     - imagehash==4.0
     - imutils==0.5.1
+    - itsdangerous==0.24
+    - keras-applications==1.0.6
+    - keras-preprocessing==1.0.5
     - kiwisolver==1.0.1
+    - lmdb==0.94
+    - markdown==3.0.1
     - matplotlib==3.0.0
     - networkx==2.2
+    - nms==0.1.5
+    - opencv-contrib-python==3.4.3.18
+    - opencv-python==3.4.3.18
+    - plumbum==1.6.7
+    - protobuf==3.6.1
     - pyhamcrest==1.9.0
+    - pymediainfo==2.3.0
     - pyparsing==2.2.2
+    - pytesseract==0.2.5
     - pywavelets==1.0.1
     - scikit-image==0.14.1
     - scikit-learn==0.20.0
     - scipy==1.1.0
+    - shapely==1.6.4.post2
+    - tensorboard==1.10.0
+    - tensorflow-gpu==1.10.0
+    - termcolor==1.1.0
     - toolz==0.9.0
     - torch==0.4.1.post2
+    - torchfile==0.1.0
     - tqdm==4.26.0
+    - visdom==0.1.8.5
+    - websocket-client==0.53.0
+    - werkzeug==0.14.1
 prefix: /home/adam/anaconda3/envs/vframe
 

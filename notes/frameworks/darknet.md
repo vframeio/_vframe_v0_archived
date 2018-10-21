@@ -8,6 +8,6 @@ Installation
 	- `export PATH=/usr/local/cuda-9.0/bin:$PATH`
     - `make clean && make`
 
-# Python interface
+# YOLO Python GPU  interface
 
-- <https://github.com/madhawav/YOLO3-4-Py>
+- `git clone https://github.com/madhawav/YOLO3-4-Py` and follow setup for GPU

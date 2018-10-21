@@ -12,6 +12,9 @@ EAST Text Detector
 https://bitbucket.org/tomhoag/opencv-text-detection/overview
 https://github.com/argman/EAST
 
+TODO
+- add angled text detector
+
 """
 
 import click
