@@ -1,5 +1,7 @@
 # VFRAME: Visual Forensics and Metadata Extraction
 
+![](docs/images/vcat_hierarchy_ao25rt.png)
+
 VFRAME is a computer vision framework for visual forensics and metadata extraction. It's designed for human rights technologists working with large datasets (millions) of videos and photos. 
 
 VFRAME runs on a single workstation with NVIDIA GPU(s) and allows a single technical operator to convert large quantities of visual information into useful metadata, training new object detectors, and export data for use with external APIs or visual search engines. VFRAME image processing framework is currently designed for technologists.
@@ -71,6 +73,7 @@ Commands:
 
 
 more instructions needed for prearing video files. things may not work right now
+
 
 
 ## TODO
