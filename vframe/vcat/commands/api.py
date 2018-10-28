@@ -18,36 +18,32 @@ from vcat.utils import vcat_api
   help='Path to JSON output file')
 @click.option('--username', 'opt_un', envvar='VCAT_USERNAME')
 @click.option('--password', 'opt_pw', envvar='VCAT_PASSWORD')
-@click.option('--get', default='all',
-    type=click.Choice(['all','hierarchy','class']),
-    help="Download options")
+@click.option('-t', '--type', 'opt_get_type', default='all',
+  type=click.Choice(['all','hierarchy','class']),
+  help="Download options")
 @click.option('--id', 'class_id', default=None, type=str,
-    help='Class ID to download')
+  help='Class ID to download')
 @click.pass_context
-def cli(ctx, fp_out, opt_un, opt_pw, get, class_id):
+def cli(ctx, fp_out, opt_un, opt_pw, opt_get_type, class_id):
   """Download only the class hierarcy from VCAT API"""
 
   log = logger_utils.Logger.getLogger()
   log.debug('generate classes')
   
   api = vcat_api.API(opt_un, opt_pw)
-
-  if not api.validate():
-    log.error('could not connect to VCAT API')  
-    return
   
-  if get == 'hierarchy':
+  if opt_get_type == 'hierarchy':
       # downloads only the hierarcy of all VCAT classes
       log.debug('getting hierarcy...')
       vcat_data = api.get_hierarchy()
-  elif get == 'class':
+  elif opt_get_type == 'class':
       # downloads class ID annotations into single JSON object VCAT API
       if not class_id :
         log.error('"--id" is required')
         return
       log.debug('getting class {}...'.format(class_id))
       vcat_data = api.get_class(class_id)
-  elif get == 'all':
+  elif opt_get_type == 'all':
       # download hierarchy and all annotations
       log.debug('getting full annotation file...')
       vcat_data = api.get_full()

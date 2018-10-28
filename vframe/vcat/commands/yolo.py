@@ -27,7 +27,7 @@ from vcat.utils import vcat_utils, yolo_utils
   help="YOLO project directory")
 @click.option('--images', 'dir_images',
   required=True,
-  default=vcat_cfg.DIR_IMAGES_V1,
+  default=vcat_cfg.DIR_IMAGES,
   help='Path to images')
 @click.option('--batch', 'opt_batch', 
   default=64, 
@@ -127,7 +127,7 @@ def cli(ctx, fp_in, dir_project, dir_images, opt_batch, opt_subdivisions, opt_si
   for fn, image_annos in anno_image_groups.items():
     lines = [x.as_line() for x in image_annos]
     txt = '\n'.join(lines)
-    fp_label = join(dir_project, 'labels', '{}.txt'.format(fn))
+    fp_label = join(dir_project, 'labels', '{}.txt'.format(Path(fn).stem))
     file_utils.write_text(lines, fp_label)
 
   # create symlinks for images
@@ -135,9 +135,9 @@ def cli(ctx, fp_in, dir_project, dir_images, opt_batch, opt_subdivisions, opt_si
   file_utils.mkdirs(dir_project_images)
   for fn, image_annos in anno_image_groups.items():
     # TODO: these should be PNG files for training
-    fp_src = join(dir_images, '{}_lg.jpg'.format(fn))
+    fp_src = join(dir_images, fn)
     fpp_src = Path(fp_src)
-    fp_dst = join(dir_project_images, '{}.jpg'.format(fn))
+    fp_dst = join(dir_project_images, fn)
     fpp_dst = Path(fp_dst)
     if fpp_dst.exists() and fpp_dst.is_symlink():
       fpp_dst.unlink()
@@ -173,7 +173,7 @@ def cli(ctx, fp_in, dir_project, dir_images, opt_batch, opt_subdivisions, opt_si
   fp_train_txt = join(dir_project, 'train.txt')
   txt = []
   for yolo_anno in annos_train:
-    txt.append(join(dir_project_images, '{}.jpg'.format(yolo_anno.filename)))
+    txt.append(join(dir_project_images, '{}'.format(yolo_anno.filename)))
   txt = '\n'.join(txt)
   file_utils.write_text(txt, fp_train_txt)
 
@@ -182,7 +182,7 @@ def cli(ctx, fp_in, dir_project, dir_images, opt_batch, opt_subdivisions, opt_si
   fp_valid_txt = join(dir_project, 'valid.txt')
   txt = []
   for yolo_anno in annos_validate:
-    txt.append(join(dir_project_images, '{}.jpg'.format(yolo_anno.filename)))
+    txt.append(join(dir_project_images, '{}'.format(yolo_anno.filename)))
   txt = '\n'.join(txt)
   file_utils.write_text(txt, fp_valid_txt)
 
@@ -259,8 +259,5 @@ def cli(ctx, fp_in, dir_project, dir_images, opt_batch, opt_subdivisions, opt_si
   yolo_utils.gen_readme()
   # done
   log.info('generated config files in: {}'.format(dir_project))  
-
-
-
 
 

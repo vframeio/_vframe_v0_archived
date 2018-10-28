@@ -44,19 +44,19 @@ def gen_annos(vcat_data, parent_hierarchy=False):
 
   # build image ID lookup table. the regions refer to these
   image_lookup =  {}
-  for class_id, object_class in vcat_data['object_classes'].items():
+  for vcat_class_id, object_class in vcat_data['object_classes'].items():
     for image in object_class['images']:
       image_lookup[image['id']] = image
     
 
-  for class_id, object_class in vcat_data['object_classes'].items():
-    log.debug('class id: {}: {}'.format(class_id, object_class['slug']))
-    class_id = slug_lookup[object_class['slug']]
-
+  for vcat_class_id, object_class in vcat_data['object_classes'].items():
+    class_label_idx = slug_lookup[object_class['slug']]
+    log.debug('class label idx: {}, vcat id: {}: {}'.format(class_label_idx, vcat_class_id, object_class['slug']))
     for region in object_class['regions']:
-      image = image_lookup[region['image']]
-      fn = image['fn']
-      yai = YoloAnnoItem(fn, class_id, region)
+      im_meta = image_lookup[region['image']]
+      fn = vcat_utils.format_im_fn(im_meta)
+      # log.debug(fn)
+      yai = YoloAnnoItem(fn, class_label_idx, region)
       annos.append(yai)
 
       if parent_hierarchy and bool(object_class['is_attribute']):
@@ -71,7 +71,6 @@ def gen_annos(vcat_data, parent_hierarchy=False):
         annos.append(yai)
 
   return annos
-
 
 
 # ---------------------------------------------------    

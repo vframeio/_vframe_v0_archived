@@ -125,6 +125,7 @@ def load_json(fp_in):
   if not Path(fp_in).exists():
     log.error('file does not exist: {}'.format(fp_in))
     return {}
+  log.debug('loading: {}'.format(fp_in))
   with open(str(fp_in), 'r') as fp:
     data = json.load(fp)
   return data
@@ -209,6 +210,7 @@ def write_json(data, fp_out, minify=True, ensure_path=True, sort_keys=True):
       json.dump(data, fp, separators=(',',':'), sort_keys=sort_keys)
     else:
       json.dump(data, fp, indent=2, sort_keys=sort_keys)
+  log.info('wrote json: {}'.format(fp_out))
 
 def write_csv(data, fp_out, header=None):
   """ """
