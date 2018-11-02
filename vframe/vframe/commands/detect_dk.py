@@ -63,6 +63,7 @@ def cli(ctx, sink, opt_disk, opt_net, opt_gpu):
   log = logger_utils.Logger.getLogger()
 
   # Initialize the parameters
+  log.debug('disk: {}'.format(opt_disk))
   fp_cfg = Paths.darknet_cfg(opt_net=opt_net, data_store=opt_disk)
   fp_weights = Paths.darknet_weights(opt_net=opt_net, data_store=opt_disk)
   fp_data = Paths.darknet_data(opt_net=opt_net, data_store=opt_disk)
@@ -101,7 +102,7 @@ def cli(ctx, sink, opt_disk, opt_net, opt_gpu):
   elif  opt_net == types.DetectorNet.SUBMUNITION:
     metadata_type = types.Metadata.SUBMUNITION
     dnn_size = (608, 608)
-    dnn_threshold = 0.7
+    dnn_threshold = 0.95
 
     # TODO: function to collapse hierarchical detections into parent class
     # flatten hierarchical objects
@@ -125,7 +126,7 @@ def cli(ctx, sink, opt_disk, opt_net, opt_gpu):
   # -------------------------------------------------
   # process 
   
-  while True:
+  while True: 
 
     chair_item = yield
     
@@ -149,15 +150,12 @@ def cli(ctx, sink, opt_disk, opt_net, opt_gpu):
       det_results = []
       for cat, score, bounds in net_outputs:
         cx, cy, w, h = bounds
-        # TODO convert to BBox()
+        # TODO convert to BBox()python 
         x1, y1 = ( int(max(cx - w / 2, 0)), int(max(cy - h / 2, 0)) )
         x2, y2 = ( int(min(cx + w / 2, imw)), int(min(cy + h / 2, imh)) )
         class_idx = class_idx_lookup[cat.decode("utf-8")]
         rect_norm = (x1/imw, y1/imh, x2/imw, y2/imh)
         det_results.append( DetectResult(class_idx, float(score), rect_norm) )
-        
-      # display to screen
-      # TODO: replace this with drawing functions
       
       metadata[frame_idx] = det_results
     

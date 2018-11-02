@@ -275,16 +275,18 @@ class MediaRecordChairItem(ChairItem):
     self._media_record = media_record
     self._sha256 = self._media_record.sha256
 
-  def load_images(self, dir_media, opt_size_label, opt_drawframes=False):
+  def load_images(self, dir_media, opt_size, opt_density, opt_drawframes=False):
 
     sha256_tree = file_utils.sha256_tree(self._sha256)
     dir_sha256 = join(dir_media, sha256_tree, self._sha256)
     
+    opt_size_label = cfg.IMAGE_SIZE_LABELS[opt_size]
+
     # get the keyframe status data to check if images available
     try:
       keyframe_status = self.get_metadata(types.Metadata.KEYFRAME_STATUS)
     except Exception as ex:
-      log.error('no keyframe metadata. Try: "append -t keyframe_status"')
+      self.log.error('no keyframe metadata. Try: "append -t keyframe_status"')
       return
 
     keyframes = {}
@@ -295,7 +297,7 @@ class MediaRecordChairItem(ChairItem):
       keyframe_metadata = self.get_metadata(types.Metadata.KEYFRAME)
       
       if not keyframe_metadata:
-        log.error('no keyframe metadata. Try: "append -t keyframe"')
+        self.log.error('no keyframe metadata. Try: "append -t keyframe"')
         return
 
       # get keyframe indices
@@ -308,7 +310,7 @@ class MediaRecordChairItem(ChairItem):
           im = cv.imread(fp_keyframe)
           im.shape  # used to invoke error if file didn't load correctly
         except:
-          log.warn('file not found: {}'.format(fp_keyframe))
+          self.log.warn('file not found: {}'.format(fp_keyframe))
           # don't add to keyframe dict
           continue
 

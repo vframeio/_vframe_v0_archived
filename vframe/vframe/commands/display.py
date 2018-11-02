@@ -58,18 +58,21 @@ def cli(ctx, sink, opt_delay):
     chair_item = yield
 
     if chair_item.chair_type == types.ChairItemType.MEDIA_RECORD:
-      log.debug('display chair media record')
       for frame_idx, frame in chair_item.drawframes.items():
-        cv.imshow('vframe', frame)
-        log.debug('show frame')
-        chair_utils.handle_keyboard(ctx, opt_delay)
+        orig_frame = chair_item.keyframes.get(frame_idx)
+        if not (orig_frame == frame).all():
+          cv.imshow('vframe', frame)
+          log.debug(chair_item.sha256 )
+          chair_utils.handle_keyboard(ctx, opt_delay)
 
     elif chair_item.chair_type == types.ChairItemType.PHOTO:
       for frame_idx, frame in chair_item.drawframes.items():
-        cv.imshow('vframe', frame)
-      log.debug('show frame')
-      ctx.opts.setdefault('paused', True)
-      chair_utils.handle_keyboard(ctx, opt_delay)
+        orig_frame = chair_item.keyframes.get(frame_idx)
+        if not (orig_frame == frame).all():
+          cv.imshow('vframe', frame)
+          log.debug('show frame')
+          ctx.opts.setdefault('paused', True)
+          chair_utils.handle_keyboard(ctx, opt_delay)
 
     elif chair_item.chair_type == types.ChairItemType.VIDEO_KEYFRAME:
       for frame_idx, frame in chair_item.drawframes.items():

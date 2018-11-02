@@ -41,7 +41,7 @@ class Paths:
     elif opt_net == types.DetectorNet.OPENIMAGES:
       fp = join(cls.DIR_DARKNET, 'data', 'openimages.names')
     elif opt_net == types.DetectorNet.SUBMUNITION:
-      fp = join(cls.DIR_DARKNET_VFRAME, 'cluster_munition_07', 'classes.txt')
+      fp = join(cls.DIR_DARKNET_VFRAME, 'munitions_09b', 'classes.txt')
     return join(cls.DataStorePath(data_store), fp)
 
   @classmethod
@@ -55,7 +55,7 @@ class Paths:
     elif opt_net == types.DetectorNet.OPENIMAGES:
       fp = join(cls.DIR_DARKNET, 'cfg', 'openimages.data')
     elif opt_net == types.DetectorNet.SUBMUNITION:
-      fp = join(cls.DIR_DARKNET_VFRAME, 'cluster_munition_07', 'meta.data')
+      fp = join(cls.DIR_DARKNET_VFRAME, 'munitions_09b', 'meta.data')
     fp = join(cls.DataStorePath(data_store), fp)
     if as_bytes:
       return bytes(fp, encoding="utf-8")
@@ -74,7 +74,7 @@ class Paths:
     elif opt_net == types.DetectorNet.OPENIMAGES:
       fp = join(cls.DIR_DARKNET, 'cfg', 'yolov3-openimages.cfg')
     elif opt_net == types.DetectorNet.SUBMUNITION:
-      fp = join(cls.DIR_DARKNET_VFRAME, 'cluster_munition_07', 'yolov3.cfg')
+      fp = join(cls.DIR_DARKNET_VFRAME, 'munitions_09b', 'yolov3.cfg')
     fp = join(cls.DataStorePath(data_store), fp)
     if as_bytes:
       return bytes(fp, encoding="utf-8")
@@ -92,7 +92,7 @@ class Paths:
     elif opt_net == types.DetectorNet.OPENIMAGES:
       fp = join(cls.DIR_DARKNET, 'weights', 'yolov3-openimages.weights')
     elif opt_net == types.DetectorNet.SUBMUNITION:
-      fp = join(cls.DIR_DARKNET_VFRAME, 'cluster_munition_07/weights', 'yolov3_23000.weights')
+      fp = join(cls.DIR_DARKNET_VFRAME, 'munitions_09b/weights', 'yolov3_40000.weights')
     fp = join(cls.DataStorePath(data_store), fp)
     if as_bytes:
       return bytes(fp, encoding="utf-8")

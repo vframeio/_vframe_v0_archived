@@ -14,7 +14,7 @@ log = logger_utils.Logger.getLogger()
 
 font = cv.FONT_HERSHEY_SIMPLEX
 tx_offset = 4
-ty_offset = 5
+ty_offset = 6
 tx2_offset = 2 * tx_offset
 ty2_offset = 2 * ty_offset
 tx_scale = 0.4
@@ -28,6 +28,7 @@ def draw_rectangle_pil(draw_ctx, bbox, color=(0,255,0), width=1):
     rect_end = (bbox.x2 + i, bbox.y2 + i)
     draw_ctx.rectangle((rect_start, rect_end), outline = color)
 
+
 def draw_roi(frame, detection_result, imw, imh, text=None,
   stroke_weight=2, rect_color=(0,255,0),text_color=(0,0,0)):
   
@@ -36,8 +37,8 @@ def draw_roi(frame, detection_result, imw, imh, text=None,
   score = detection_result.score
 
   # draw border
-  pt1, pt2 = bbox.pt1, bbox.pt2
-  cv.rectangle(frame, pt1.tuple() , pt2.tuple(), rect_color, thickness=stroke_weight)
+  pt_tl, pt_br = bbox.pt_tl, bbox.pt_br
+  cv.rectangle(frame, pt_tl.tuple() , pt_br.tuple(), rect_color, thickness=stroke_weight)
 
   # prepare label
   if text:
@@ -48,32 +49,51 @@ def draw_roi(frame, detection_result, imw, imh, text=None,
   tw, th = cv.getTextSize(label, cv.FONT_HERSHEY_SIMPLEX, tx_scale, tx_weight)[0]
 
   # draw label bg
-  rect_pt2 = (pt1.x + tw + tx2_offset, pt1.y - th - ty2_offset)
-  cv.rectangle(frame, pt1.tuple(), rect_pt2, rect_color, -1)
+  bg_y = pt_tl.y - th - ty2_offset  # text above box default
+  txt_y = 0 -  int(1.5 * ty_offset)
+  if bg_y < 0:
+    bg_y = pt_tl.y + th + ty2_offset  # text below box default
+    txt_y = int(2.4 * ty_offset)
+
+  rect_pt_br = (pt_tl.x + tw + tx2_offset, bg_y)
+  cv.rectangle(frame, pt_tl.tuple(), rect_pt_br, rect_color, -1)
+  
   # draw label
-  cv.putText(frame, label, pt1.offset(tx_offset, -ty_offset), font, tx_scale, tx_clr, tx_weight)
+  cv.putText(frame, label, pt_tl.offset(tx_offset, -ty_offset), font, tx_scale, text_color, tx_weight)
   return frame
 
 
 def draw_detection_result(frame, classes, detection_result, imw, imh, 
-  stroke_weight=2, rect_color=(0,255,0),text_color=(0,0,0)):
+  stroke_weight=2, rect_color=(0,255,0), text_color=(0,0,0)):
   
-  bbox = BBox(detection_result.rect).scale(imw, imh)
+  bbox = BBox(*detection_result.rect).to_dim((imw, imh))
   class_idx = detection_result.idx
   score = detection_result.score
 
+  lum = (0.2126 * rect_color[2]) + (0.7152 * rect_color[1]) + (0.0722 * rect_color[0])
+  if lum > 100:
+    text_color = (0,0,0)
+  else:
+    text_color = (255, 255, 255)
   # draw border
-  pt1, pt2 = bbox.pt1, bbox.pt2
-  cv.rectangle(frame, pt1.tuple() , pt2.tuple(), rect_color, thickness=stroke_weight)
+  pt_tl, pt_br = bbox.pt_tl, bbox.pt_br
+  cv.rectangle(frame, pt_tl.tuple() , pt_br.tuple(), rect_color, thickness=stroke_weight)
 
   # prepare label
-  label = '{} ({:.2f})'.format(classes[class_idx].upper(), float(score))
-  log.debug('label: {}, bbox: {}'.format(label, str(bbox.as_box())))
+  class_label = classes[class_idx].upper().replace('_',' ')
+  label = '{} ({:.2f})'.format(class_label, float(score))
   tw, th = cv.getTextSize(label, cv.FONT_HERSHEY_SIMPLEX, tx_scale, tx_weight)[0]
 
   # draw label bg
-  rect_pt2 = (pt1.x + tw + tx2_offset, pt1.y + th + ty2_offset)
-  cv.rectangle(frame, pt1.tuple(), rect_pt2, rect_color, -1)
+  bg_y = pt_tl.y - th - ty2_offset  # text above box default
+  txt_y = 0 -  int(1.5 * ty_offset)
+  if bg_y < 0:
+    bg_y = pt_tl.y + th + ty2_offset  # text below box default
+    txt_y = int(2.4 * ty_offset)
+
+  rect_pt_br = (pt_tl.x + tw + tx2_offset, bg_y)
+  cv.rectangle(frame, pt_tl.tuple(), rect_pt_br, rect_color, -1)
+
   # draw label
-  cv.putText(frame, label, pt1.offset(tx_offset, 3*ty_offset), font, tx_scale, tx_clr, tx_weight)
+  cv.putText(frame, label, pt_tl.offset(tx_offset, txt_y), font, tx_scale, text_color, tx_weight)
   return frame
