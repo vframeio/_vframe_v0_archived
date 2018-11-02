@@ -45,11 +45,11 @@ class BBox:
 
 
   @property
-  def pt1(self):
+  def pt_tl(self):
     return self._bbp1
 
   @property
-  def pt2(self):
+  def pt_br(self):
     return self._bbp2
 
   @property

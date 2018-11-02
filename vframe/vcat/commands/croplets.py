@@ -51,6 +51,11 @@ def cli(ctx, dir_project, opt_cropped):
   for fp_im, fp_label in zip(tqdm(fp_ims), fp_labels):
     count = 0
     annos = file_utils.load_text(fp_label)
+
+    if not annos or len(annos) < 1 or annos == ['']:
+      log.debug('skipping empty file')
+      continue
+
     fn = Path(fp_im).stem
     # load image
     im = cv.imread(fp_im)

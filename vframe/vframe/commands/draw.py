@@ -10,6 +10,23 @@ from vframe.settings import vframe_cfg as cfg
 from vframe.models.bbox import BBox
 from cli_vframe import processor
 
+import matplotlib as mpl
+import matplotlib.cm as mplcm
+import matplotlib.pyplot as plt
+from matplotlib import cm
+
+def get_color_map(cmap='prism', ncolors=20, as_hex=False, reverse=False, bgr=True):
+  norm  = mpl.colors.Normalize(vmin=0, vmax=ncolors-1)
+  scalars = mplcm.ScalarMappable(norm=norm, cmap=cmap)
+  colors = [scalars.to_rgba(i) for i in range(ncolors)]
+  colors = [(int(255*c[0]),int(255*c[1]),int(255*c[2])) for c in colors]  
+  if reverse:
+    colors = colors[::-1]
+  if bgr:
+    colors = [c[::-1] for c in colors]
+  if as_hex:
+    colors = ['#{:02x}{:02x}{:02x}'.format(c[0],c[1],c[2]) for c in colors]
+  return colors
 
 # --------------------------------------------------------
 # Displays images, no video yet
@@ -24,8 +41,8 @@ from cli_vframe import processor
   type=cfg.DataStoreVar,
   show_default=True,
   help=click_utils.show_help(types.DataStore))
-@click.option('--stroke-weight', 'opt_stroke_weight', default=2,
-  help='Rectangle outline stroke weight')
+@click.option('--stroke-width', 'opt_stroke_width', default=3,
+  help='Rectangle outline stroke width (px')
 @click.option('--stroke-color', 'opt_stroke_color', 
   type=(int, int, int), default=(0,255,0),
   help='Rectangle color')
@@ -34,7 +51,7 @@ from cli_vframe import processor
   help='Text color')
 @processor
 @click.pass_context
-def cli(ctx, sink, opt_metadata, opt_disk, opt_stroke_weight, opt_stroke_color, opt_text_color):
+def cli(ctx, sink, opt_metadata, opt_disk, opt_stroke_width, opt_stroke_color, opt_text_color):
   """Displays images"""
   
   # -------------------------------------------------
@@ -51,6 +68,7 @@ def cli(ctx, sink, opt_metadata, opt_disk, opt_stroke_weight, opt_stroke_color, 
   
   # -------------------------------------------------
   # init 
+
 
   log = logger_utils.Logger.getLogger()
   
@@ -75,6 +93,9 @@ def cli(ctx, sink, opt_metadata, opt_disk, opt_stroke_weight, opt_stroke_color, 
   elif opt_metadata == types.Metadata.FACE_ROI:
     pass
   
+  # get colors for stroke
+  colors = get_color_map(cmap='autumn', reverse=True, ncolors=len(classes))
+
   # TODO externalize function
   
   # -------------------------------------------------
@@ -105,17 +126,18 @@ def cli(ctx, sink, opt_metadata, opt_disk, opt_stroke_weight, opt_stroke_color, 
           or opt_metadata == types.Metadata.VOC \
           or opt_metadata == types.Metadata.OPENIMAGES:
           # draw object detection boxes and labels
+          log.debug(detection_result)
           frame = draw_utils.draw_detection_result(drawframe, classes, detection_result, 
-            imw, imh, stroke_weight=opt_stroke_weight, 
-            rect_color=opt_stroke_color, text_color=opt_text_color)
+            imw, imh, stroke_weight=opt_stroke_width, 
+            rect_color=colors[detection_result.idx], text_color=opt_text_color)
 
         elif opt_metadata == types.Metadata.TEXT_ROI:
           frame = draw_utils.draw_roi(drawframe, detection_result, 
-            imw, imh, text='TEXT', stroke_weight=opt_stroke_weight, 
+            imw, imh, text='TEXT', stroke_weight=opt_stroke_width, 
             rect_color=opt_stroke_color, text_color=opt_text_color)
         elif opt_metadata == types.Metadata.FACE_ROI:
           frame = draw_utils.draw_roi(drawframe, detection_result, 
-            imw, imh, text='FACE', stroke_weight=opt_stroke_weight, 
+            imw, imh, text='FACE', stroke_weight=opt_stroke_width, 
             rect_color=opt_stroke_color, text_color=opt_text_color)
         
       # add to current items drawframes dict

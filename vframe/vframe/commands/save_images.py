@@ -50,7 +50,7 @@ def cli(ctx, sink, opt_dir_media):
     
     chair_item = yield
     
-    for frame_idx, frame in chair_item.keyframes.items():
+    for frame_idx, frame in chair_item.drawframes.items():
       # save frame to the output folder
       fp_im = join(opt_dir_media, 'frame_{}.png'.format(file_utils.zpad(frame_count)))
       cv.imwrite(fp_im, frame) 

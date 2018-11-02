@@ -2,43 +2,32 @@
 Mine negative images for Null class with Yolo training
 """
 import click
+import pandas as pd
 
 from vframe.utils import click_utils
 from vframe.settings import types
 from vframe.settings import vframe_cfg as cfg
-
-FP_NEG_LIST = '/data_store_ssd/apps/vframe/models/darknet/vframe/cluster_munition_07/negatives.txt'
-DIR_PROJECT = '/data_store_ssd/apps/vframe/models/darknet/vframe/cluster_munition_07'
+from vcat.settings import vcat_cfg
 
 # --------------------------------------------------------
 # testing
 # --------------------------------------------------------
 @click.command()
-@click.option('-i', '--input', 'fp_neg_list', default=FP_NEG_LIST,
-  help='Override file input path')
-@click.option('--project', 'dir_project', default=DIR_PROJECT,
-  help='Override file input path')
-@click.option('-v', '--verified', 'opt_verified',
-  default=click_utils.get_default(types.Verified.VERIFIED),
-  type=cfg.VerifiedVar,
-  show_default=True,
-  help=click_utils.show_help(types.Verified))
+@click.option('-i', '--input', 'opt_fp_neg', required=True,
+  help='Negatives CSV')
+@click.option('-o', '--output', 'opt_dir_project', required=True,
+  help='Path to existing YOLO project')
 @click.option('-d', '--disk', 'opt_disk',
-  default=click_utils.get_default(types.DataStore.SSD),
+  default=click_utils.get_default(types.DataStore.HDD),
   type=cfg.DataStoreVar,
   show_default=True,
   help=click_utils.show_help(types.DataStore))
-@click.option('--density', 'opt_density',
-  default=click_utils.get_default(types.KeyframeMetadata.EXPANDED),
-  show_default=True,
-  type=cfg.KeyframeMetadataVar,
-  help=click_utils.show_help(types.KeyframeMetadata))
 @click.option('--size', 'opt_size',
   type=cfg.ImageSizeVar,
   default=click_utils.get_default(types.ImageSize.LARGE),
   help=click_utils.show_help(types.ImageSize))
 @click.pass_context
-def cli(ctx, fp_neg_list, dir_project, opt_verified, opt_disk, opt_density, opt_size):
+def cli(ctx, opt_fp_neg, opt_dir_project, opt_disk, opt_size):
   """Generates negative images"""
 
   # ------------------------------------------------
@@ -54,32 +43,37 @@ def cli(ctx, fp_neg_list, dir_project, opt_verified, opt_disk, opt_density, opt_
   log = logger_utils.Logger.getLogger()
   log.debug('negative mining')
 
-  dir_media = Paths.media_dir(types.Metadata.KEYFRAME, data_store=opt_disk, verified=opt_verified)
+  dir_media_unver = Paths.media_dir(types.Metadata.KEYFRAME, data_store=opt_disk, verified=types.Verified.UNVERIFIED)
+  dir_media_ver = Paths.media_dir(types.Metadata.KEYFRAME, data_store=opt_disk, verified=types.Verified.VERIFIED)
   opt_size_label = cfg.IMAGE_SIZE_LABELS[opt_size]
 
-  sha256_list = file_utils.load_text(fp_neg_list)
-  
-  fp_train_neg = join(dir_project, 'train_negative.txt')
-  dir_labels_negative = join(dir_project, 'labels_negative')
-  dir_negative = join(dir_project, 'images_negative')
+  fp_train_neg = join(opt_dir_project, vcat_cfg.FP_TRAIN_NEGATIVES)
+  dir_labels_negative = join(opt_dir_project, vcat_cfg.DIR_LABELS_NEGATIVE)
+  dir_negative = join(opt_dir_project, vcat_cfg .DIR_IMAGES_NEGATIVE)
 
   file_utils.mkdirs(dir_negative)
   file_utils.mkdirs(dir_labels_negative)
   
+  negative_list = pd.read_csv(opt_fp_neg)
+  negative_list['description'] = negative_list['description'].fillna('')  # ensure not empty
+  # negative_list['desc'] = negative_list['desc'].astype('str') 
   neg_training_files = []
 
-  for sha256 in sha256_list[:35]:
-    log.debug('sha256: {}'.format(sha256))
+  # for sha256 in sha256_list[:35]:
+  for i, row in negative_list.iterrows():
+    sha256 = row['sha256']
     sha256_tree = file_utils.sha256_tree(sha256)
-    dir_sha256 = join(dir_media, sha256_tree, sha256)
-    frame_idxs = os.listdir(dir_sha256)
+    ver_list = glob(join(dir_media_ver, sha256_tree, sha256, "*"))
+    unver_list = glob(join(dir_media_unver, sha256_tree, sha256, "*"))
+    dir_frames = ver_list + unver_list
 
-    for frame_idx in frame_idxs:
-      log.debug('frame: {}'.format(frame_idx))
-      fp_keyframe_src = join(dir_sha256, file_utils.zpad(frame_idx), opt_size_label, 'index.jpg')
+    log.debug('adding {} frames about "{}"'.format(len(dir_frames), row['description']))
+
+    for dir_frame in dir_frames:
+      frame_idx = Path(dir_frame).stem
+      fp_keyframe_src = join(dir_frame, opt_size_label, 'index.jpg')
       fpp_keyframe_src = Path(fp_keyframe_src)
       if fpp_keyframe_src.exists():
-        log.debug('exists: {}'.format(fpp_keyframe_src))
         # create symlinked image
         fpp_keyframe_dst = Path(join(dir_negative, '{}_{}.jpg'.format(sha256, frame_idx)))
         if fpp_keyframe_dst.exists() and fpp_keyframe_dst.is_symlink():
@@ -94,4 +88,9 @@ def cli(ctx, fp_neg_list, dir_project, opt_verified, opt_disk, opt_density, opt_
 
 
   # for each keyframe if it exists
+  log.info('writing {} lines to: {}'.format(len(neg_training_files), fp_train_neg))
   file_utils.write_text(neg_training_files, fp_train_neg)
+  
+  # add prompt
+  log.info('mv labels_negative/*.txt labels/')
+  log.info('mv images_negative/*.jpg images/')

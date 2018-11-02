@@ -1,3 +1,4 @@
+import sys
 import os
 from os.path import join
 import json
@@ -18,22 +19,20 @@ class API:
   
     if not un or not pw:
       self.log.error('Username and/or password not supplied')
-      return None
+      sys.exit()
     self.un = un
     self.pw = pw
     # TODO move to config
     self.hierarchy_url = vcat_cfg.VCAT_HIERARCHY_URL
 
-
-  def validate(self):
-    # TODO add check credentials
-    self.is_valid = True
-    return self.is_valid
-
   def get_hierarchy(self):
-    hierarchy_raw = requests.get(self.hierarchy_url, auth=(self.un, self.pw)).json()
-    hierarchy = { int(class_meta['id']): class_meta for class_meta in hierarchy_raw }
-    return hierarchy
+    try:
+      hierarchy_raw = requests.get(self.hierarchy_url, auth=(self.un, self.pw)).json()
+    except:
+      self.log.error('Could not get data from: {}'.format(self.hierarchy_url))
+      return {}
+
+    return { int(class_meta['id']): class_meta for class_meta in hierarchy_raw }
 
 
   def request_regions(self, class_id):
@@ -50,8 +49,7 @@ class API:
   def get_full(self):
 
     objs_regions = {}
-    hierarchy = self.get_hierarchy(
-      )
+    hierarchy = self.get_hierarchy()
     for hierarchy_id, hierarchy_obj in hierarchy.items():
       if int(hierarchy_obj['region_count']) > 0:
         slug = hierarchy_obj['slug'].replace(':','').replace('-','_')

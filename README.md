@@ -8,6 +8,15 @@ VFRAME runs on a single workstation with NVIDIA GPU(s) and allows a single techn
 
 VFRAME includes a utlity called [VCAT](https://github.com/vframeio/vcat) to search the metadata and can execute visual queries on 10M keyframes in less than 0.3 seconds.
 
+### Current Research
+
+The VFRAME/VCAT project is currently exploring how 3D modeling can be used to augment existing image training sets. Below are examples of 2 illegal cluster munitions: AO 2.5RT and the ShOAB 0,5.
+
+![](docs/images/vframe_3d_ao_25rt.jpg)
+
+![](docs/images/vframe_3d_shoab.jpg)
+
+
 **VFRAME is under daily development. This page will be updated often during Oct-December**
 
 ![](docs/images/vframe_screenshot_04.10.2018_02.png)

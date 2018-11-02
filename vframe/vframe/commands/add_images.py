@@ -37,7 +37,6 @@ from cli_vframe import processor
 @click.pass_context
 def cli(ctx, sink, opt_dir_media, opt_disk, opt_density, opt_size_type, opt_drawframes):
   """Appends images to ChairItem"""
-
   
   # -------------------------------------------------
   # imports 
@@ -63,8 +62,6 @@ def cli(ctx, sink, opt_dir_media, opt_disk, opt_density, opt_size_type, opt_draw
   else:
     dir_media = opt_dir_media
 
-  # opt_size_label = cfg.IMAGE_SIZE_LABELS[opt_size_type]
-
   
   # -------------------------------------------------
   # process 
@@ -81,7 +78,7 @@ def cli(ctx, sink, opt_dir_media, opt_disk, opt_density, opt_size_type, opt_draw
     if chair_item.chair_type == types.ChairItemType.VIDEO_KEYFRAME:
       chair_item.load_images(opt_size_type, opt_drawframes=opt_drawframes)
     if chair_item.chair_type == types.ChairItemType.MEDIA_RECORD:
-      chair_item.load_images(dir_media, opt_size_type, opt_drawframes=opt_drawframes)
+      chair_item.load_images(dir_media, opt_size_type, opt_density, opt_drawframes=opt_drawframes)
     # ------------------------------------------------------------
     # send back to generator
 
