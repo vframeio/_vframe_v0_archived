@@ -6,7 +6,7 @@ VFRAME is a computer vision framework for visual forensics and metadata extracti
 
 VFRAME runs on a single workstation with NVIDIA GPU(s) and allows a single technical operator to convert large quantities of visual information into useful metadata, training new object detectors, and export data for use with external APIs or visual search engines. VFRAME image processing framework is currently designed for technologists.
 
-VFRAME includes a utlity called [VCAT](https://github.com/vframeio/vcat) to search the metadata and can execute visual queries on 10M keyframes in less than 0.3 seconds.
+VFRAME includes a utility called [VCAT](https://github.com/vframeio/vcat) to search the metadata and can execute visual queries on 10M keyframes in less than 0.3 seconds.
 
 ### Current Research
 
@@ -81,7 +81,7 @@ Commands:
 ```
 
 
-more instructions needed for prearing video files. things may not work right now
+More instructions needed for preparing video files. Things may not work right now
 
 
 
@@ -93,7 +93,7 @@ October 21 - 31
 - add CRNN text recognition (eng)
 - add tesseract 4.0 OCR (eng, ara)
 - add ROI image extraction
-- intregrate FAISS build scripts from VCAT
+- integrate FAISS build scripts from VCAT
 
 Nov 1 - 31
 
